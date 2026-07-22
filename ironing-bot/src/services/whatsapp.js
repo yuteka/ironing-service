@@ -1,12 +1,9 @@
 const axios = require('axios');
 const prisma = require('./db');
 
-const fallbackToken = 'EAA9BZBX8yl3YBSBI6wEeKSGO1NP1Wbg1658KX2s8fSUP7EsIg6tArFVZB2SdX36XJMzizgjKIevVHgvOjlaavE0nte6Bv12qctRTG6eJMW6BbUXZBSGFbxDXZBCB7fQWeqjC80g87QFPM7nZCLh4UJtRoe9amzt6ycGYrWZAzv4qZBAVB4ZAWL1wrMHq0fhZBTsQ3xTjdwuNZA4nHW6ZB328xXNioCAjCNgNBi4fiK6aPYWKefeKyNDzbYlN5UVkIjre5VlCgyDQoymHtodqkDoZAmUTW6qzZC26zKjcUDLoZD';
-const fallbackPhoneId = '1178896158643216';
-
 async function getCredentials() {
-  const envToken = (process.env.WHATSAPP_TOKEN || fallbackToken).trim();
-  const envPhoneId = (process.env.PHONE_ID || fallbackPhoneId).trim();
+  const envToken = (process.env.WHATSAPP_TOKEN || '').trim();
+  const envPhoneId = (process.env.PHONE_ID || '').trim();
 
   try {
     const dbSettings = await prisma.businessSettings.findUnique({ where: { id: 1 } });

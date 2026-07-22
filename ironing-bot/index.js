@@ -15,14 +15,10 @@ app.post('/api/payment/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure upload directory exists for storing temporary files
-const uploadsDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, 'uploads');
+// Ensure upload directory exists for storing cloth checking photos locally
+const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
-  try {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  } catch (e) {
-    console.error('[Uploads Dir Warning]:', e.message);
-  }
+  fs.mkdirSync(uploadsDir);
 }
 // Pre-generate / Serve Price List PDF dynamically on-demand
 const pdfService = require('./src/services/pdf');
@@ -99,13 +95,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });
 });
 
-if (!process.env.VERCEL) {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Bot running on port ${PORT}`);
-  });
-}
-
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Bot running on port ${PORT}`);
+});
 
 module.exports = app;

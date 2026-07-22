@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment variables (CRITICAL: Keeps keys safe)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.vercel/
+
+# Logs & temporary files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+uploads/*.pdf
+uploads/*.png
+uploads/*.jpg
+scratch/
+
+# System
+.DS_Store
+Thumbs.db

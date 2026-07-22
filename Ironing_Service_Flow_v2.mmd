@@ -1,0 +1,77 @@
+flowchart TB
+    Start([Customer sends Hi]):::entry --> CheckDB{Mobile in DB?}:::decision
+    CheckDB -->|New| NewCust[Collect Name, Address,<br/>Google Map, Landmark]:::customer
+    NewCust --> SaveCust[(Save customer)]:::db
+    SaveCust --> Menu
+    CheckDB -->|Existing| Menu{{Main Menu}}:::customer
+
+    Menu --> M1[Price List]:::customer
+    Menu --> M2[Place Order]:::customer
+    Menu --> M3[Check Order]:::customer
+    Menu --> M4[Update Address]:::customer
+    Menu --> M5[Contact Support]:::customer
+
+    M1 --> Catalog[Show catalog<br/>admin-editable<br/>Min 5 - Free pickup & delivery]:::catalog
+    Catalog --> Menu
+
+    M4 --> NewCust
+
+    M5 --> Support[Help options:<br/>Missing / Damage / Delay /<br/>Payment / Other]:::support
+    Support --> Ticket[(Create ticket<br/>notify admin)]:::db
+
+    M3 --> ViewOrders[List active orders<br/>multiple allowed]:::customer
+    ViewOrders --> CancelChk{Before Collected?}:::decision
+    CancelChk -->|Yes| CanCancel[Cancel Order button]:::customer
+    CancelChk -->|No| NoCancel[No cancel -<br/>Contact Support]:::error
+
+    M2 --> Qty[Ask quantity]:::customer
+    Qty --> MinChk{Qty >= 5?}:::decision
+    MinChk -->|No| RejectMin[Minimum is 5 -<br/>add more items]:::error
+    RejectMin --> Qty
+    MinChk -->|Yes| Date[Pickup date:<br/>Today / Tomorrow]:::customer
+    Date --> Time[Pickup time:<br/>Morning / Afternoon / Evening]:::customer
+    Time --> ConfirmQ{Confirm?}:::decision
+    ConfirmQ -->|No| Menu
+    ConfirmQ -->|Yes| Placed[Order placed - #ID]:::status
+
+    Placed --> AdminCard[(Admin order card<br/>+ instant alert)]:::admin
+    AdminCard --> Assign[Admin assigns partner<br/>from dropdown]:::admin
+    Assign --> Link[Send signed token link<br/>scoped to partner + today<br/>expires 11:59 PM]:::partner
+    Link --> Dash[Partner dashboard<br/>Call / Navigate / Reached /<br/>Picked / Cant Make It]:::partner
+
+    Dash --> AvailQ{Cant Make It?}:::decision
+    AvailQ -->|Yes| Unassign[Order -> Unassigned<br/>highlighted for admin]:::error
+    Unassign --> Assign
+    AvailQ -->|No| Picked[Picked - take photo<br/>tick any issues]:::partner
+
+    Picked --> DmgQ{Issues found?}:::decision
+    DmgQ -->|No| S1
+    DmgQ -->|Yes| AskCust[Send photo + issues<br/>Do you accept?]:::customer
+    AskCust --> RespQ{Customer response}:::decision
+    RespQ -->|Yes| S1
+    RespQ -->|Call Us| Support
+    RespQ -->|No reply 1-2h| Auto[Auto-accept<br/>notify customer]:::status
+    Auto --> S1
+
+    S1[Collected]:::status --> S2[Reached Shop]:::status
+    S2 --> S3[Ironing Started]:::status
+    S3 --> S4[Ready]:::status
+    S4 --> PayQ{Payment mode}:::decision
+    PayQ -->|Cash| S5
+    PayQ -->|Razorpay| PayLink[Send invoice + link<br/>final price locked]:::payment
+    PayLink --> S5[Out for Delivery]:::status
+    S5 --> S6[Delivered]:::status
+
+    Invalid[Invalid input fallback:<br/>Please use the buttons below]:::error -.applies at every step.-> Menu
+
+    classDef entry fill:#0EA5E9,stroke:#0369A1,color:#fff
+    classDef customer fill:#10B981,stroke:#047857,color:#fff
+    classDef decision fill:#F59E0B,stroke:#B45309,color:#1f2937
+    classDef admin fill:#6366F1,stroke:#3730A3,color:#fff
+    classDef partner fill:#EC4899,stroke:#9D174D,color:#fff
+    classDef status fill:#14B8A6,stroke:#0F766E,color:#fff
+    classDef payment fill:#84CC16,stroke:#4D7C0F,color:#1f2937
+    classDef error fill:#EF4444,stroke:#991B1B,color:#fff
+    classDef support fill:#A855F7,stroke:#6B21A8,color:#fff
+    classDef catalog fill:#F97316,stroke:#9A3412,color:#fff
+    classDef db fill:#475569,stroke:#1e293b,color:#fff

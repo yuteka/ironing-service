@@ -1,0 +1,90 @@
+flowchart TD
+    %% ============ CUSTOMER ENTRY ============
+    A[Customer sends Hi on WhatsApp]:::customer --> B{Bot: Check mobile<br/>number in DB}:::bot
+    B -->|New| C[Bot: Collect Name, Address,<br/>Google Map location, Landmark]:::bot
+    C --> D[Store in customers table]:::bot
+    B -->|Existing| E[Bot: Welcome back!<br/>Place Order / Check Order /<br/>Price List / Update Address /<br/>Contact Support]:::bot
+    D --> E
+
+    %% ============ INVALID INPUT FALLBACK (OPTIONAL) ============
+    E -. types instead of buttons .-> F[OPTIONAL - Bot input fallback:<br/>Please use the buttons below]:::optional
+    F --> E
+
+    %% ============ PRICE LIST ============
+    E -->|Price List| G[Bot shows admin-editable catalog:<br/>Shirt 15, Pant 20, Saree 40,<br/>T-Shirt 15, Coat 50<br/>Min order 5 - Free pickup & delivery]:::bot
+    G --> E
+
+    %% ============ UPDATE ADDRESS ============
+    E -->|Update Address| UA[Bot: Re-collect Name, Address,<br/>Map, Landmark - overwrite record]:::bot
+    UA --> E
+
+    %% ============ PLACE ORDER ============
+    E -->|Place Order| H[Bot: How many clothes?]:::bot
+    H --> I{OPTIONAL - Enforce<br/>minimum order: Count >= 5?}:::optional
+    I -->|No| J[Bot: Minimum 5 clothes.<br/>Please add more items.]:::optional
+    J --> H
+    I -->|Yes| K[Bot: Pickup date?<br/>Today / Tomorrow]:::bot
+    K --> L[Bot: Pickup time?<br/>Morning / Afternoon / Evening]:::bot
+    L --> M[Bot: Confirm order summary?<br/>Yes / No]:::bot
+    M -->|No| E
+    M -->|Yes| N[Bot: Order placed!<br/>Order #12345]:::bot
+    N --> O[Admin notified - new order<br/>appears on dashboard]:::admin
+
+    %% ============ ADMIN ASSIGNMENT ============
+    O --> P[Admin opens order card:<br/>Customer, address+map, count, slot]:::admin
+    P --> Q[Admin picks pickup partner<br/>from dropdown - Manage Partners CRUD]:::admin
+    Q --> R[System sends WhatsApp to partner<br/>with signed token link<br/>scoped to partner + today, expires 11:59 PM]:::admin
+    R --> S[Partner taps link - opens<br/>today-only mobile web dashboard]:::partner
+
+    %% ============ PARTNER DASHBOARD ============
+    S --> T[Today's Jobs list:<br/>Call / Navigate / Reached /<br/>Picked / Not Available / Cant Make It]:::partner
+    T -->|Cant Make It<br/>partner-side| U[OPTIONAL - Partner reassignment:<br/>Order flips to Unassigned,<br/>highlighted for admin]:::optional
+    U --> Q
+    T -->|No 'Reached' past threshold| U
+    T -->|Not Available<br/>customer not home| NA[Reschedule pickup slot,<br/>same partner kept,<br/>bot notifies customer]:::partner
+    NA --> T
+    T -->|Navigate| NAV[Opens Google Maps with<br/>stored lat/long]:::partner
+    NAV --> T
+    T -->|Reached| RCH[Reached timestamp logged<br/>partner is on-site]:::partner
+    RCH -->|Picked tap| PT[Picked timestamp logged<br/>- separate from Reached -<br/>used for SLA / disputes]:::partner
+    PT --> V{Inspect clothes -<br/>any issues?}:::partner
+
+    %% ============ PRE-PICKUP CONDITION CHECK ============
+    V -->|No issues| W[Mark Picked - no photo needed<br/>skip customer notify]:::partner
+    V -->|Issues found| X[Tick issues: Button missing,<br/>Torn, Stain, Already burnt,<br/>Color faded, Other<br/>Photo upload OPTIONAL]:::partner
+    X --> Y[Bot notifies customer:<br/>We noticed ... photo if uploaded<br/>Do you accept? Yes / Call Us]:::bot
+    Y --> Z{Customer reply<br/>within 1-2 hours?}:::customer
+    Z -->|Yes accept| W
+    Z -->|Call Us| CS[Routed to admin support<br/>- manual resolution]:::admin
+    Z -->|No reply| AA[OPTIONAL - Damage acceptance timeout:<br/>Auto-accept after 1-2 hrs,<br/>notify customer, configurable]:::optional
+    AA --> W
+
+    %% ============ STATUS PUSHES + PAYMENT AT READY (OPTIONAL) ============
+    W --> BB[Status pushes to customer one-line WhatsApp:<br/>Confirmed -> Pickup Assigned -> Collected -><br/>Reached Shop -> Ironing Started -> Ready]:::bot
+    BB --> CC[OPTIONAL - Send payment at Ready:<br/>Razorpay invoice + link sent now<br/>OR Cash on Delivery skip]:::optional
+    CC --> DD[Out for Delivery -> Delivered]:::bot
+
+    %% ============ CHECK ORDER / CANCEL ============
+    E -->|Check Order| CO[Bot shows current status<br/>multiple orders allowed in parallel]:::bot
+    CO --> CO1{Status before Collected?}:::bot
+    CO1 -->|Yes| CO2[Show Cancel Order button]:::bot
+    CO1 -->|No| CO3[Show Contact Support only<br/>- no edit item count]:::bot
+
+    %% ============ SUPPORT ============
+    E -->|Contact Support| SUP[Bot menu: Cloth Missing /<br/>Cloth Damage / Delay /<br/>Payment / Other]:::bot
+    SUP --> SUP2[Ticket created<br/>admin notified]:::admin
+    SUP2 --> DMG[POST-DELIVERY damage ticket:<br/>separate from pre-pickup check<br/>Admin uploads photo,<br/>customer sees photo + Call Us,<br/>manual resolution by admin]:::admin
+
+    %% ============ COLOR LEGEND ============
+    classDef bot fill:#DCEBFB,stroke:#6FA8DC,color:#1B3A5B
+    classDef customer fill:#FBDDE7,stroke:#D98AA8,color:#5B1B36
+    classDef admin fill:#E4DAF5,stroke:#9B82D1,color:#2E1B5B
+    classDef partner fill:#FFE6CC,stroke:#E0A86B,color:#5B3A1B
+    classDef optional fill:#D6F2E0,stroke:#7CB89A,color:#1B5B36,stroke-dasharray: 5 5
+
+    L1[Bot - light blue]:::bot
+    L2[Customer - light pink]:::customer
+    L3[Admin - lavender]:::admin
+    L4[Pickup Partner - peach]:::partner
+    L5[Optional features - mint dashed]:::optional
+    L1 ~~~ L2 ~~~ L3 ~~~ L4 ~~~ L5

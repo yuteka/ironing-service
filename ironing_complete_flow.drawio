@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-29T00:00:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram name="Complete Flow - No Blocking" id="ironing-complete-flow">
+    <mxGraphModel dx="2200" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="2400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ LEGEND ============ -->
+        <mxCell id="legend_box" value="LEGEND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=12;fontStyle=1;verticalAlign=top;align=left;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="40" width="280" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="Customer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBDDE7;strokeColor=#D98AA8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="70" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="Bot" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="108" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="Admin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DAF5;strokeColor=#9B82D1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="146" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="No-Block Rule" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6F2E0;strokeColor=#2E8B57;fontSize=11;fontStyle=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="184" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" value="Decision" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1395" y="232" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ TITLE ============ -->
+        <mxCell id="title" value="One Customer, Multiple Orders — Full Flow (No Order Ever Blocks Another)" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#21295C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="900" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ ENTRY ============ -->
+        <mxCell id="n_hi" value="Customer sends &quot;Hi&quot;&#10;(any time, any number of times)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBDDE7;strokeColor=#D98AA8;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="120" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_check" value="Bot: Check mobile number&#10;in customers table" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="220" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_new" value="NEW number&#10;Collect Name, Address,&#10;Map, Landmark → store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="340" y="220" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_menu" value="Main Menu shown&#10;(Place Order / Check Order /&#10;Price List / Update Address /&#10;Contact Support)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="360" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============ NO BLOCK RULE 1 ============ -->
+        <mxCell id="rule1" value="RULE 1: Menu never checks if customer&#10;already has an active order.&#10;Place Order is always available." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6F2E0;strokeColor=#2E8B57;fontSize=12;fontStyle=1;dashed=1;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="360" width="320" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ============ PLACE ORDER FLOW ============ -->
+        <mxCell id="n_place" value="Customer taps&#10;&quot;Place Order&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBDDE7;strokeColor=#D98AA8;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="500" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_count" value="Bot: How many clothes?&#10;→ Min 5 check&#10;→ Pickup date/time&#10;→ Confirm summary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="600" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_neworder" value="NEW Order created&#10;Order ID #(N+1)&#10;e.g. #12346, #12347...&#10;independent DB row" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="730" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============ RULE 2 ============ -->
+        <mxCell id="rule2" value="RULE 2: Every order gets its own unique&#10;Order ID. Existing orders (any status)&#10;are never touched, paused, or affected&#10;by a new order being placed." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6F2E0;strokeColor=#2E8B57;fontSize=12;fontStyle=1;dashed=1;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="730" width="320" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_back" value="Returns to Main Menu&#10;(can place ANOTHER order&#10;immediately, no wait)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="860" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ============ MULTIPLE ORDERS TABLE VISUAL ============ -->
+        <mxCell id="db_box" value="Database — orders table (example state)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#21295C;fontSize=13;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="680" y="500" width="560" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="db_row0" value="order_id | customer_phone | status" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#21295C;strokeColor=#21295C;fontColor=#FFFFFF;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="520" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="db_row1" value="#12345 | 98765xxxxx | Ironing Started" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F9FB;strokeColor=#CBD9E0;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="576" width="520" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="db_row2" value="#12346 | 98765xxxxx | Pickup Assigned" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD9E0;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="612" width="520" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="db_row3" value="#12347 | 98765xxxxx | Order Confirmed (just placed)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F9FB;strokeColor=#CBD9E0;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="648" width="520" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="db_row4" value="#12200 | 98765xxxxx | Delivered (past order)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD9E0;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="700" y="684" width="520" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="db_note" value="Same phone number → multiple independent rows.&#10;Each row has its own status, never linked or blocked by another." style="text;html=1;fontSize=12;fontColor=#5C7080;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="730" width="520" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ CHECK ORDER FLOW ============ -->
+        <mxCell id="n_checkorder" value="Customer taps&#10;&quot;Check Order&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBDDE7;strokeColor=#D98AA8;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="680" y="860" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_showall" value="Bot shows ALL active orders&#10;(status before Delivered),&#10;each with its own Order ID&#10;clearly labeled" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="680" y="960" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rule3" value="RULE 3: Status display always shows&#10;Order ID first. Customer never has to&#10;guess which order an update refers to." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6F2E0;strokeColor=#2E8B57;fontSize=12;fontStyle=1;dashed=1;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="960" y="960" width="280" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============ STATUS PUSH MESSAGES ============ -->
+        <mxCell id="n_statuspush" value="Automatic WhatsApp status push&#10;(any stage: Collected, Ready, etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DAF5;strokeColor=#9B82D1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="680" y="1100" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_msgformat" value="Message ALWAYS includes Order ID:&#10;&quot;Order #12346 is Ready for pickup!&quot;&#10;NOT just &quot;Your order is ready!&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="1200" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ============ ADMIN SIDE - PARALLEL PROCESSING ============ -->
+        <mxCell id="admin_title" value="Admin Side — Orders Processed Independently" style="text;html=1;fontSize=16;fontStyle=1;fontColor=#21295C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="980" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_admin1" value="#12345 → Partner Ravi&#10;currently Ironing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DAF5;strokeColor=#9B82D1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1030" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="n_admin2" value="#12346 → Partner Kumar&#10;assigned for pickup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DAF5;strokeColor=#9B82D1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1030" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="n_admin3" value="#12347 → not yet assigned&#10;(just placed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4DAF5;strokeColor=#9B82D1;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="480" y="1030" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rule4" value="RULE 4: Each order is assigned, tracked, and resolved on its own timeline.&#10;A delay or issue on #12345 has zero effect on #12346 or #12347." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D6F2E0;strokeColor=#2E8B57;fontSize=12;fontStyle=1;dashed=1;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1130" width="600" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ============ EDGE CASES SECTION ============ -->
+        <mxCell id="edge_title" value="Edge Cases — All Explicitly Handled" style="text;html=1;fontSize=16;fontStyle=1;fontColor=#21295C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1340" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge1_q" value="What if customer places 2 orders&#10;with the SAME pickup slot today?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1390" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1_a" value="Allowed. Each order is independent.&#10;Admin can assign the SAME partner&#10;to do both pickups in one visit&#10;(manual admin convenience),&#10;or two different partners." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1390" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge2_q" value="What if customer wants to cancel&#10;ONE order but keep the other?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1510" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2_a" value="No problem. Cancel button is shown&#10;PER ORDER (via Check Order screen).&#10;Cancelling #12347 has zero effect&#10;on #12345 or #12346." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1510" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge3_q" value="What if payment is due on #12345&#10;while #12346 is still being ironed?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1630" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3_a" value="Payment is requested PER ORDER&#10;at its own &quot;Ready&quot; stage. #12345&#10;can be paid and delivered while&#10;#12346 is still in the shop." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1630" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge4_q" value="What if customer's number changes&#10;between order #1 and order #2?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1750" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4_a" value="New number = New customer record&#10;(system can't auto-link). Old order&#10;history stays under old number.&#10;Admin can manually merge if needed." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1750" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge5_q" value="What if a damage issue is found&#10;on #12346 — does it pause #12347?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1390" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5_a" value="No. The dispute/accept flow is scoped&#10;ONLY to #12346. #12347 continues&#10;through its own stages completely&#10;unaffected." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="980" y="1390" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge6_q" value="What if NO pickup partner is&#10;available for one of the orders?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1510" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6_a" value="That ONE order stays in&#10;&quot;Unassigned&quot; queue, flagged for&#10;admin. Other orders for the same&#10;(or different) customer are&#10;processed normally, no delay." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="980" y="1510" width="300" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edge7_q" value="What if customer messages &quot;Hi&quot;&#10;while an order is already active?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="1630" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7_a" value="Bot still replies &quot;Welcome back&quot;&#10;and shows the normal menu — having&#10;an active order never restricts&#10;menu access or starts a different flow." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEBFB;strokeColor=#6FA8DC;fontSize=12;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="980" y="1630" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============ FINAL SUMMARY BANNER ============ -->
+        <mxCell id="summary" value="CORE PRINCIPLE: Every order is a fully independent record from creation to delivery.&#10;No step in the system ever checks &quot;does this customer have another order&quot; before proceeding.&#10;The only shared element is the customer's phone number used to look them up — nothing else is shared or blocked." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#21295C;strokeColor=#21295C;fontColor=#FFFFFF;fontSize=14;fontStyle=1;align=left;spacingLeft=14;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1860" width="1220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============ EDGES / ARROWS ============ -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_hi" target="n_check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="New" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="n_check" target="n_new">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="Existing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_check" target="n_menu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.3;" edge="1" parent="1" source="n_new" target="n_menu">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_menu" target="n_place">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_place" target="n_count">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_count" target="n_neworder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_neworder" target="n_back">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="loop back" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;dashed=1;strokeColor=#2E8B57;" edge="1" parent="1" source="n_back" target="n_menu">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="895" />
+              <mxPoint x="20" y="405" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_neworder" target="db_box">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="850" />
+              <mxPoint x="960" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_checkorder" target="n_showall">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="n_showall" target="rule3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="n_statuspush" target="n_msgformat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge1_q" target="edge1_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge2_q" target="edge2_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge3_q" target="edge3_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge4_q" target="edge4_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge5_q" target="edge5_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge6_q" target="edge6_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="edge7_q" target="edge7_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

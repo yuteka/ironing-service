@@ -1,0 +1,84 @@
+flowchart TD
+    %% ============ CUSTOMER ENTRY ============
+    A[Customer sends Hi on WhatsApp]:::customer --> B{Bot: Check mobile<br/>number in DB}:::bot
+    B -->|New| C[Bot: Collect Name, Address,<br/>Google Map location, Landmark]:::bot
+    C --> D[Store in customers table]:::bot
+    B -->|Existing| E[Bot: Welcome back!<br/>Place Order / Check Order /<br/>Price List / Update Address /<br/>Contact Support]:::bot
+    D --> E
+
+    %% ============ INVALID INPUT FALLBACK ============
+    E -. types instead of buttons .-> F[Bot: Please use the<br/>buttons below]:::bot
+    F --> E
+
+    %% ============ PRICE LIST ============
+    E -->|Price List| G[Bot shows admin-editable catalog:<br/>Shirt 15, Pant 20, Saree 40,<br/>T-Shirt 15, Coat 50<br/>Min order 5 - Free pickup & delivery]:::bot
+    G --> E
+
+    %% ============ UPDATE ADDRESS ============
+    E -->|Update Address| UA[Bot: Re-collect Name, Address,<br/>Map, Landmark - overwrite record]:::bot
+    UA --> E
+
+    %% ============ PLACE ORDER ============
+    E -->|Place Order| H[Bot: How many clothes?]:::bot
+    H --> I{Count >= 5?}:::bot
+    I -->|No| J[Bot: Minimum 5 clothes.<br/>Please add more items.]:::bot
+    J --> H
+    I -->|Yes| K[Bot: Pickup date?<br/>Today / Tomorrow]:::bot
+    K --> L[Bot: Pickup time?<br/>Morning / Afternoon / Evening]:::bot
+    L --> M[Bot: Confirm order summary?<br/>Yes / No]:::bot
+    M -->|No| E
+    M -->|Yes| N[Bot: Order placed!<br/>Order #12345]:::bot
+    N --> O[Admin notified - new order<br/>appears on dashboard]:::admin
+
+    %% ============ ADMIN ASSIGNMENT ============
+    O --> P[Admin opens order card:<br/>Customer, address+map, count, slot]:::admin
+    P --> Q[Admin picks pickup partner<br/>from dropdown - Manage Partners CRUD]:::admin
+    Q --> R[System sends WhatsApp to partner<br/>with signed token link<br/>scoped to partner + today, expires 11:59 PM]:::admin
+    R --> S[Partner taps link - opens<br/>today-only mobile web dashboard]:::partner
+
+    %% ============ PARTNER DASHBOARD ============
+    S --> T[Today's Jobs list:<br/>Call / Navigate / Reached /<br/>Picked / Cant Make It]:::partner
+    T -->|Cant Make It| U[Order flips to Unassigned<br/>- highlighted for admin]:::admin
+    U --> Q
+    T -->|No 'Reached' past threshold| U
+    T -->|Navigate| NAV[Opens Google Maps with<br/>stored lat/long]:::partner
+    NAV --> T
+    T -->|Reached then Picked| V{Inspect clothes -<br/>any issues?}:::partner
+
+    %% ============ DAMAGE / CONDITION CHECK ============
+    V -->|No issues| W[Mark Picked - no photo needed]:::partner
+    V -->|Issues found| X[Tick issues: Button missing,<br/>Torn, Stain, Already burnt,<br/>Color faded, Other<br/>Photo upload OPTIONAL]:::partner
+    X --> Y[Bot notifies customer:<br/>We noticed ... photo if uploaded<br/>Do you accept? Yes / Call Us]:::bot
+    Y --> Z{Customer reply<br/>within 1-2 hours?}:::customer
+    Z -->|Yes accept| W
+    Z -->|Call Us| CS[Routed to admin support<br/>- manual resolution]:::admin
+    Z -->|No reply - timeout| AA[Auto-accept, notify:<br/>We've proceeded, call us<br/>if concerns. Configurable.]:::bot
+    AA --> W
+
+    %% ============ STATUS PUSHES ============
+    W --> BB[Status pushes to customer one-line WhatsApp:<br/>Confirmed -> Pickup Assigned -> Collected -><br/>Reached Shop -> Ironing Started -> Ready]:::bot
+    BB --> CC[At Ready status:<br/>Razorpay invoice + payment link sent<br/>OR Cash on Delivery skip]:::bot
+    CC --> DD[Out for Delivery -> Delivered]:::bot
+
+    %% ============ CHECK ORDER / CANCEL ============
+    E -->|Check Order| CO[Bot shows current status<br/>multiple orders allowed in parallel]:::bot
+    CO --> CO1{Status before Collected?}:::bot
+    CO1 -->|Yes| CO2[Show Cancel Order button]:::bot
+    CO1 -->|No| CO3[Show Contact Support only<br/>- no edit item count]:::bot
+
+    %% ============ SUPPORT ============
+    E -->|Contact Support| SUP[Bot menu: Cloth Missing /<br/>Cloth Damage / Delay /<br/>Payment / Other]:::bot
+    SUP --> SUP2[Ticket created<br/>admin notified]:::admin
+    SUP2 --> DMG[Damage flow: Admin uploads photo<br/>Customer sees photo + Call Us<br/>Manual resolution by admin]:::admin
+
+    %% ============ NUDE SHADE LEGEND ============
+    classDef bot fill:#F5E6D3,stroke:#A88A6A,color:#3D2E1F
+    classDef customer fill:#EFD9C1,stroke:#9A7B5B,color:#3D2E1F
+    classDef admin fill:#D9C2A7,stroke:#7C5E42,color:#2E2114
+    classDef partner fill:#E8D3B8,stroke:#8C6B47,color:#3D2E1F
+
+    L1[Bot]:::bot
+    L2[Customer]:::customer
+    L3[Admin]:::admin
+    L4[Pickup Partner]:::partner
+    L1 ~~~ L2 ~~~ L3 ~~~ L4

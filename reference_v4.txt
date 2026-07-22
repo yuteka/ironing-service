@@ -1,0 +1,786 @@
+﻿IRONING SERVICE
+Final Developer Reference — V2 (Merged & Verified)
+Combines: Field Analysis V2 (source of truth) + Developer Checklist V2 (tech stack detail)
+⚠ Where the two source documents disagreed, the Field Analysis V2 was treated as authoritative (it reflects your actual/final decisions), and the conflict is called out explicitly below.
+How This Document Is Organized
+Part A — Corrected Final Tech Stack (Frontend, Backend, Database, Payment, Hosting)
+Part B — Database Fields Summary (Mandatory vs Optional)
+Part C — Razorpay Integration (setup + code)
+Part D — V2 Critical Logic Changes (Partner Login + Cloth Check ordering)
+Part E — Build Order
+SEPARATE SECTION AT THE END — Full Developer Checklist (all ☐ items grouped by category, including Testing)
+
+PART A — Corrected Final Tech Stack
+✅ CORRECTED: Hosting is Hostinger VPS KVM 2, not KVM 1. The Developer Checklist doc's tech-stack table said "KVM 1", but the Field Analysis V2 (Section 6) confirms you actually have KVM 2 (8GB RAM / 2 vCPU / 100GB NVMe) and explicitly recommends it over KVM 1 for this project. KVM 2 is used everywhere in this merged document.
+A.1 Final Stack — One Table
+Layer
+Technology
+Why
+WhatsApp Bot
+Node.js + Express.js
+Handles persistent webhook POSTs 24/7, PM2-managed
+Admin Frontend
+React.js (Vite)
+Internal tool, no SEO needed, deploys as static files
+Partner Frontend
+React.js (Vite)
+Simple mobile view — login + today's jobs only
+Database
+PostgreSQL
+Structured data + reliable transactions for payments
+ORM
+Prisma
+Type-safe queries, easy migrations
+Auth
+JWT + bcrypt
+Stateless tokens for Admin + Partner login
+Payment
+Razorpay
+India-specific: UPI, cards, netbanking
+PDF Invoice
+PDFKit
+Lightweight PDF generation in Node.js
+Process Manager
+PM2
+Keeps bot alive 24/7, auto-restart on crash
+Reverse Proxy
+Nginx
+Routes domain traffic, serves React static builds
+SSL
+Certbot
+Free auto-renewing SSL — required for Meta webhook
+Hosting
+Hostinger VPS KVM 2
+8GB RAM / 2 vCPU / 100GB NVMe — corrected from KVM 1
+A.2 Frontend Decision — React.js vs Next.js
+Feature
+React.js (Vite)
+Next.js
+Winner (this project)
+Rendering
+Client-side only
+SSR + CSR + Static
+Next.js (in general)
+SEO
+Poor
+Excellent
+Not needed here
+Deployment on Hostinger
+Static files — simple
+Needs Node server
+React
+Admin dashboard fit
+Perfect — no SEO needed
+Overkill
+React
+Partner dashboard fit
+Perfect — simple mobile view
+Overkill
+React
+Learning curve / bundle size
+Lower / lighter
+Medium / heavier
+React
+Verdict: Use React.js (Vite) for both Admin Dashboard and Partner Dashboard. No public-facing pages exist and no SEO is required, so Next.js adds complexity without benefit.
+A.3 Backend Decision — Why Express.js
+Option
+Verdict for this project
+Express.js
+✅ Best choice — lightweight, full control, PM2-compatible, runs webhooks reliably 24/7
+Fastify
+Optional only — faster, but smaller ecosystem, harder for a small team
+Next.js API routes
+❌ Not suitable — serverless model doesn't suit a persistent WhatsApp webhook
+NestJS
+❌ Overkill — heavy structure/learning curve for this scale
+
+PART B — Database Fields Summary (Mandatory vs Optional)
+Condensed from Field Analysis V2, Section 1. 🔴 = Mandatory for V1 launch, 🟡 = Optional / can add later.
+B.1 customers
+Field
+Type
+Status
+Notes
+phone
+VARCHAR(20)
+🔴 MANDATORY
+Primary key — identifies customer on every message
+name
+VARCHAR(100)
+🔴 MANDATORY
+Collected at registration
+address
+TEXT
+🔴 MANDATORY
+Street address for pickup
+latitude / longitude
+DECIMAL
+🔴 MANDATORY
+From Google Maps share — powers Navigate button
+landmark
+VARCHAR(200)
+🟡 OPTIONAL
+Helps partner find location
+created_at / updated_at
+TIMESTAMP
+🔴 MANDATORY
+Auto-set / updated on address change
+B.2 orders
+Field
+Type
+Status
+Notes
+id
+INT AUTO
+🔴 MANDATORY
+Shown as #12345 in all messages
+customer_phone
+VARCHAR(20)
+🔴 MANDATORY
+FK → customers.phone
+partner_id
+INT
+🟡 OPTIONAL
+Set when admin assigns partner
+status
+VARCHAR(50)
+🔴 MANDATORY
+Confirmed→...→Delivered
+payment_status
+VARCHAR(20)
+🔴 MANDATORY
+Pending→Paid — controls Picked lock
+payment_method
+VARCHAR(20)
+🟡 OPTIONAL
+Razorpay or Cash
+razorpay_link
+TEXT
+🟡 OPTIONAL
+Stored so it can be resent if expired
+total_amount
+DECIMAL(10,2)
+🔴 MANDATORY
+Auto-calculated from order_items
+pickup_date / pickup_slot
+VARCHAR(20)
+🔴 MANDATORY
+Today/Tomorrow · Morning/Afternoon/Evening
+cloth_check_status / note / photo_url
+VARCHAR/TEXT
+🟡 OPTIONAL
+V2 addition — set during cloth check step
+reached_at / picked_at
+TIMESTAMP
+🟡 OPTIONAL
+SLA / dispute reference
+created_at / updated_at
+TIMESTAMP
+🔴 MANDATORY
+Order lifecycle timestamps
+B.3 order_items · partners · support_tickets · price_catalog · webhook_logs
+Table
+Key Mandatory Fields
+Notes
+order_items
+order_id, item_type, quantity, rate, subtotal
+quantity entered by partner during physical count, NOT customer estimate
+partners (V2)
+name, phone, username, password_hash, active
+ID + Password login (V2) — bcrypt hashed, never plain text
+support_tickets
+customer_phone, category, status
+category: ClothMissing / Damage / Delay / Payment / Other
+price_catalog
+item_name, rate, active
+Admin-editable pricing shown in bot
+webhook_logs
+payload, source, received_at, processed
+source: WhatsApp or Razorpay — for debugging
+
+PART C — Razorpay Integration
+C.1 Setup Steps
+Create a Razorpay account (business PAN + bank details needed)
+Complete KYC verification — upload business documents (1–3 days)
+Dashboard → Settings → API Keys → Generate Test Keys
+Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env
+npm install razorpay
+Test with test keys first; switch to live keys only for production
+C.2 Create Payment Link
+const Razorpay = require('razorpay');const razorpay = new Razorpay({  key_id: process.env.RAZORPAY_KEY_ID,  key_secret: process.env.RAZORPAY_KEY_SECRET,});async function createPaymentLink(orderId, amount, customerPhone, customerName) {  const paymentLink = await razorpay.paymentLink.create({    amount: amount * 100, // Razorpay takes paise    currency: 'INR',    description: `Ironing Service - Order #${orderId}`,    customer: { name: customerName, contact: customerPhone },    notify: { sms: false, email: false }, // sent via WhatsApp ourselves    callback_url: `https://yourdomain.com/payment-success`,    callback_method: 'get',  });  return paymentLink.short_url; // e.g. https://rzp.io/l/abc123}
+C.3 Webhook — Payment Confirmation
+const crypto = require('crypto');router.post('/api/payment/webhook', express.raw({type:'application/json'}), async (req, res) => {  const signature = req.headers['x-razorpay-signature'];  const expectedSig = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)    .update(req.body).digest('hex');  if (signature !== expectedSig) return res.sendStatus(400); // reject fake  const event = JSON.parse(req.body);  if (event.event === 'payment_link.paid') {    const orderId = event.payload.payment_link.entity.description.split('#')[1];    await prisma.order.update({      where: { id: parseInt(orderId) },      data: { paymentStatus: 'Paid', paymentMethod: 'Razorpay' },    });    // Unlock Picked button (frontend checks paymentStatus)  }  res.sendStatus(200);});
+C.4 Razorpay Test Cards
+Card Number
+Expiry
+CVV
+Result
+4111 1111 1111 1111
+Any future date
+Any 3 digits
+✅ Payment Success
+5267 3181 8797 5449
+Any future date
+Any 3 digits
+✅ Payment Success
+4000 0000 0000 0002
+Any future date
+Any 3 digits
+❌ Payment Failed
+
+PART D — V2 Critical Logic Changes
+D.1 Partner Login — ID + Password (Backend)
+routes/auth.js — POST /api/auth/partner/login
+Receive username + password
+Find partner by username in DB
+bcrypt.compare(password, partner.password_hash)
+If match → issue JWT with { partnerId, role: 'partner' }
+If no match → return 401 Unauthorized
+middleware/auth.js — protect partner routes
+Verify JWT → check role === 'partner'
+Add req.partnerId = token.partnerId
+GET /api/partner/jobs → WHERE partner_id = req.partnerId (partner sees only their own jobs)
+D.2 Cloth Check Before Pre-Payment — Corrected Flow
+Step
+Old V1 Order
+New V2 Order (Correct)
+1
+Partner taps Reached
+Partner taps Reached
+2
+Partner counts clothes
+Partner checks cloth condition ← NEW POSITION
+3
+Payment request sent
+Customer accepts / auto-accepts condition
+4
+Customer pays
+Partner counts actual clothes
+5
+Partner taps Picked
+Payment request sent to customer
+6
+—
+Customer pays (Razorpay or cash)
+7
+—
+Partner taps Picked (unlocked)
+Why this order is correct: cloth condition must be documented and accepted by the customer BEFORE the count and payment. Disputes raised after payment are harder to resolve — checking first creates a clean record before any money changes hands.
+
+PART E — Build Order
+#
+Phase
+1
+Backend: Express server + Prisma schema + PostgreSQL on Hostinger KVM 2
+2
+WhatsApp: Webhook receive + bot flow (Hi → menu → place order → status push)
+3
+Partner Dashboard: Login + jobs list + cloth check + count + payment + Picked
+4
+Razorpay: Payment link creation + webhook confirmation + Picked button unlock
+5
+Admin Dashboard: Login + orders + bulk ready + partner CRUD (ID+Password) + tickets
+6
+Testing: All 14 test cases → move to Hostinger production → Meta template approval → Go live
+
+DEVELOPER CHECKLIST (Separate Section)
+Every actionable ☐ item from both source documents, deduplicated and grouped by category. Tick these off in order during the build.
+1. Hostinger KVM 2 — Server Setup
+☐  SSH in: ssh root@your-vps-ip
+☐  Update server: sudo apt update && sudo apt upgrade -y
+☐  Install Node.js 20 LTS
+☐  Install PostgreSQL 16: sudo apt install postgresql-16 -y
+☐  Install PM2: npm install -g pm2
+☐  Install Nginx: sudo apt install nginx -y
+☐  Install Certbot SSL: sudo apt install certbot python3-certbot-nginx -y
+☐  Create DB + user + grant privileges
+☐  Clone repo + npm install + configure .env
+☐  Run Prisma migrations: npx prisma migrate deploy
+☐  Start with PM2: pm2 start index.js --name ironing-bot
+☐  Configure Nginx (bot webhook + admin static + partner static)
+☐  SSL: sudo certbot --nginx -d yourdomain.com
+☐  Build React frontends locally + upload dist/ via SFTP
+☐  Update Meta webhook URL to permanent domain
+☐  (Optional) Install fail2ban for SSH security
+☐  (Optional) Setup UFW firewall: sudo ufw allow 80,443,22/tcp
+☐  (Optional) Daily DB backup cron job
+2. Backend / API
+☐  Express server scaffolded with routes/, middleware/, services/ structure
+☐  Prisma schema covers: customers, orders, order_items, partners, support_tickets, price_catalog, webhook_logs
+☐  JWT auth middleware protects Admin and Partner routes separately
+☐  GET /api/partner/jobs filters strictly by req.partnerId
+3. Frontend
+☐  Admin Dashboard built with React.js (Vite) — no Next.js
+☐  Partner Dashboard built with React.js (Vite) — simple mobile view
+☐  Both deployed as static files via Nginx on Hostinger
+☐  JWT stored on login and attached to all authenticated requests
+4. Partner Login (V2 Change)
+☐  Admin creates partner account: name, phone, username, password (hashed with bcrypt)
+☐  Partner opens dashboard URL → logs in with username + password
+☐  JWT token issued on login — stored in browser localStorage
+☐  Admin deletes partner account → partner instantly loses access
+☐  No daily WhatsApp link to generate or send
+☐  bcrypt installed: npm install bcrypt — hash on create, compare on login
+5. Cloth Check Before Pre-Payment (V2 Change)
+☐  Flow updated to: Reached → Cloth condition check → Customer accepts → Count clothes → Payment → Picked
+☐  If no issues: skip notification, go directly to count clothes
+☐  If issues: tick checklist + optional photo → customer WhatsApp notification
+☐  Customer accepts or auto-accepts after 1–2 hours → then count + payment
+☐  Picked button stays locked until cloth check resolved AND payment confirmed
+6. WhatsApp Templates
+☐  All required templates drafted with exact body text
+☐  Templates submitted for Meta approval before go-live
+☐  Template-sending code tested for each status push
+7. Razorpay
+☐  Razorpay business account created + KYC completed
+☐  Test API keys generated and added to .env
+☐  npm install razorpay completed
+☐  createPaymentLink() tested and returns a valid short_url
+☐  Webhook signature verified with crypto.createHmac before trusting payload
+☐  payment_link.paid event updates order.paymentStatus = 'Paid'
+☐  Picked button unlocks only after paymentStatus = 'Paid'
+☐  Switched from test keys to live keys before production launch
+8. Testing — Full Sequence (Do in This Order)
+☐  1. Local server starts — node index.js shows 'Bot running on port 3000'
+☐  2. ngrok tunnel works — https URL shows online
+☐  3. Webhook verified by Meta — green tick on Verify and Save
+☐  4. Bot receives 'Hi' — replies with welcome + menu
+☐  5. New customer registration — saved in DB, menu shown
+☐  6. Place Order full flow — order created with unique ID
+☐  7. Partner login works — today's jobs shown after login
+☐  8. Cloth condition check — customer receives photo + issue notification
+☐  9. Cloth count + payment request — customer gets itemised bill + Razorpay link
+☐  10. Razorpay payment (test mode) — webhook fires, status = Paid, Picked unlocks
+☐  11. Picked button locked test — tapping before payment returns 403
+☐  12. No-block rule test — 2nd order works independently while 1st is active
+☐  13. Status push messages — admin marks Ready, customer gets WhatsApp update
+☐  14. Invoice PDF — downloads with correct order details after Delivered
+9. Security
+☐  JWT for Admin: role='admin', expires in 24h
+☐  JWT for Partner: role='partner', partnerId claim, expires in 24h
+☐  bcrypt for partner passwords: minimum cost factor 10
+☐  Meta webhook verification: X-Hub-Signature-256 header checked on every POST
+☐  Razorpay webhook signature verified (crypto.createHmac)
+☐  All secrets in .env — never committed to Git
+☐  HTTPS mandatory (Certbot SSL on Hostinger VPS)
+☐  .gitignore includes: .env, node_modules, dist
+☐  Input validation on all API endpoints (express-validator)
+☐  Rate limiting on /webhook endpoint (express-rate-limit)
+☐  Partner can only see their own orders (partnerId in JWT vs order.partnerId)
+End of document.
+IRONING SERVICE
+Complete Architecture Addendum — V2
+Cross-checked against ironing_final_v2.drawio (Final Flow V2) — every node, decision, and rule in the flow is mapped to a folder, endpoint, template, test, or checklist item below.
+⚠ This section is appended to your Final Developer Reference V2 document. It adds: Project Folder Structure, Database Schema, API Endpoints, WhatsApp Template Creation, WhatsApp Bot Flow (code), full Production Testing sequence, and Security Checklist — all verified against the flow diagram so no step is missing.
+
+PART F — Flow Diagram Traceability (Drawio → Code Map)
+Every numbered section of your Final Flow V2 diagram, mapped to where it is implemented. This is the completeness check — if a row below has an entry in every column, that flow step is fully covered.
+Flow Section (drawio)
+Where It Lives in Code
+API / Bot Handler
+1. Customer Entry (Hi → DB check → new/existing)
+services/bot.js → handleTextMessage()
+POST /webhook
+2. Menu Branches (5 buttons + Check Order list)
+services/bot.js → handleButtonClick()
+POST /webhook
+3. Place Order (count → slot → active-order soft warn → confirm → INSERT)
+services/bot.js → startOrderFlow(), confirmOrder()
+POST /webhook (internal INSERT, no REST call)
+4. Admin Assigns Partner (dropdown, V2 ID+Password CRUD)
+pages/Orders.jsx, pages/Partners.jsx
+PUT /api/orders/:id/assign · POST /api/partners
+5. Partner Dashboard (login, jobs, navigate, reached, can't-make-it, not-available)
+ironing-partner/src/pages/*.jsx
+POST /api/auth/partner/login · GET /api/partner/jobs · PUT .../reached · PUT .../cant-make-it · PUT .../not-available
+6. Cloth Condition Check (BEFORE payment) — V2 changed step
+JobDetail.jsx (new ClothCheck.jsx component)
+POST /api/partner/jobs/:id/cloth-check ← ADDED (was missing)
+7. Pre-Payment (count UI → payment request → Razorpay/Cash → Picked lock)
+CountClothes.jsx, services/razorpay.js
+POST /api/partner/jobs/:id/count · POST /api/payment/create-link · POST /api/payment/webhook · POST .../cash-received · PUT .../picked
+8. Status Updates + Invoice
+services/whatsapp.js, services/pdf.js
+PUT /api/orders/:id/status · GET /api/orders/:id/invoice
+9. Post-Delivery Support (damage report → ticket)
+pages/Tickets.jsx
+GET /api/tickets · PUT /api/tickets/:id/resolve
+10. Database — multiple independent orders per customer
+prisma/schema.prisma → Order model (no unique constraint blocking multiple rows per phone)
+—
+✅ GAP FIXED (found by comparing against your flow diagram): Flow diagram Section 6 (Cloth Condition Check) has no corresponding REST endpoint in the original API list — the partner needed a way to submit the checklist (Button missing / Torn / Stain / Burnt / Faded / Other) and optional photo. Added POST /api/partner/jobs/:id/cloth-check below, wired before the count/payment endpoints, matching the flow's BEFORE-payment position exactly.
+
+PART G — Project Folder Structure
+G.1 Backend (Express.js)
+ironing-bot/├── src/│   ├── routes/│   │   ├── webhook.js       ← receive WhatsApp messages│   │   ├── orders.js        ← order CRUD APIs│   │   ├── partners.js      ← partner CRUD APIs│   │   ├── payment.js       ← Razorpay APIs│   │   └── auth.js          ← login APIs│   ├── services/│   │   ├── whatsapp.js      ← send messages helper│   │   ├── bot.js           ← bot flow logic│   │   ├── razorpay.js      ← payment helper│   │   └── pdf.js           ← invoice PDF generator│   ├── middleware/│   │   ├── auth.js          ← JWT verify middleware│   │   └── validate.js      ← input validation│   └── prisma/│       └── schema.prisma    ← database schema├── index.js                 ← Express app entry├── .env                     ← environment variables└── package.json
+G.2 Admin Frontend (React + Vite)
+ironing-admin/├── src/│   ├── pages/│   │   ├── Dashboard.jsx    ← order overview│   │   ├── Orders.jsx       ← order management│   │   ├── Partners.jsx     ← partner CRUD│   │   ├── Tickets.jsx      ← support tickets│   │   └── Login.jsx        ← admin login│   ├── components/          ← reusable UI components│   └── App.jsx├── index.html└── package.json
+G.3 Partner Frontend (React + Vite)
+ironing-partner/├── src/│   ├── pages/│   │   ├── Login.jsx        ← username + password login│   │   ├── JobList.jsx      ← today's jobs│   │   ├── JobDetail.jsx    ← navigate, reached, cloth check│   │   ├── ClothCheck.jsx   ← ADDED: issue checklist + photo upload│   │   └── CountClothes.jsx ← cloth counter + payment request│   └── App.jsx└── package.json
+
+PART H — Database Schema (Prisma)
+Paste into prisma/schema.prisma — covers every table referenced in the flow diagram, including the V2 cloth-check fields.
+model Customer {  phone     String   @id  name      String  address   String  latitude  Float?  longitude Float?  landmark  String?  createdAt DateTime @default(now())  orders    Order[]}model Partner {  id       Int     @id @default(autoincrement())  name     String  phone    String  username String  @unique   // V2: ID+Password login  password String            // hashed with bcrypt  active   Boolean @default(true)  orders   Order[]}model Order {  id                Int       @id @default(autoincrement())  customerPhone     String  customer          Customer  @relation(fields: [customerPhone], references: [phone])  partnerId         Int?  partner           Partner?  @relation(fields: [partnerId], references: [id])  status            String    @default("Confirmed")  paymentStatus     String    @default("Pending")  paymentMethod     String?             // Razorpay or Cash  totalAmount       Float?  pickupDate        String  pickupSlot        String              // Morning/Afternoon/Evening  clothCheckStatus  String?   @default("None")   // None / IssuesFound / CustomerAccepted  clothCheckNote    String?  clothPhotoUrl     String?  reachedAt         DateTime?  pickedAt          DateTime?  items             OrderItem[]  createdAt         DateTime  @default(now())  updatedAt         DateTime  @updatedAt}model OrderItem {  id       Int    @id @default(autoincrement())  orderId  Int  order    Order  @relation(fields: [orderId], references: [id])  itemType String            // Shirt/Pant/Saree/T-Shirt/Coat  quantity Int  rate     Float  subtotal Float}model SupportTicket {  id            Int      @id @default(autoincrement())  customerPhone String  orderId       Int?  category      String            // ClothMissing/Damage/Delay/Payment/Other  status        String   @default("Open")  createdAt     DateTime @default(now())}
+
+PART I — API Endpoints (Complete, Gap-Checked)
+I.1 WhatsApp
+Method
+Endpoint
+Auth
+Description
+GET
+/webhook
+None
+Meta webhook verification — one-time setup
+POST
+/webhook
+None
+Receive all incoming WhatsApp messages (covers all customer button/text replies, including cloth-check accept/reject)
+I.2 Auth
+Method
+Endpoint
+Auth
+Description
+POST
+/api/auth/admin/login
+None
+Admin login → returns JWT
+POST
+/api/auth/partner/login
+None
+Partner login with username+password (V2) → returns JWT
+I.3 Orders (Admin)
+Method
+Endpoint
+Auth
+Description
+GET
+/api/orders
+Admin JWT
+List all orders with filters (status, date, partner)
+GET
+/api/orders/:id
+Admin JWT
+Single order detail with items, customer, timeline
+PUT
+/api/orders/:id/status
+Admin JWT
+Update order status → triggers WhatsApp template push
+PUT
+/api/orders/:id/assign
+Admin JWT
+Assign partner to order
+PUT
+/api/orders/:id/cancel
+Admin JWT
+Cancel order (only allowed before Collected)
+POST
+/api/orders/:id/bulk-ready
+Admin JWT
+Mark multiple orders Ready at once
+GET
+/api/orders/:id/invoice
+Admin JWT
+Generate and return invoice PDF
+I.4 Partner Dashboard
+Method
+Endpoint
+Auth
+Description
+GET
+/api/partner/jobs
+Partner JWT
+Today's assigned jobs for logged-in partner only
+PUT
+/api/partner/jobs/:id/reached
+Partner JWT
+Log Reached timestamp
+POST
+/api/partner/jobs/:id/cloth-check
+Partner JWT
+ADDED — submit condition checklist (Button missing/Torn/Stain/Burnt/Faded/Other) + optional photo, BEFORE count/payment
+POST
+/api/partner/jobs/:id/count
+Partner JWT
+Submit actual cloth count → calculate total (only after cloth-check resolved)
+POST
+/api/partner/jobs/:id/cash-received
+Partner JWT
+Mark cash payment received → unlock Picked
+PUT
+/api/partner/jobs/:id/picked
+Partner JWT
+Mark Picked (only if payment confirmed)
+PUT
+/api/partner/jobs/:id/cant-make-it
+Partner JWT
+Order goes Unassigned for admin reassignment
+PUT
+/api/partner/jobs/:id/not-available
+Partner JWT
+Customer not home → reschedule same partner, new slot
+I.5 Payment — Razorpay
+Method
+Endpoint
+Auth
+Description
+POST
+/api/payment/create-link
+Admin/Partner JWT
+Generate Razorpay payment link for order
+POST
+/api/payment/webhook
+Signature verify
+Razorpay payment success webhook
+I.6 Partners (Admin CRUD) & Support
+Method
+Endpoint
+Auth
+Description
+GET
+/api/partners
+Admin JWT
+List all partners
+POST
+/api/partners
+Admin JWT
+Create partner with username+password (V2)
+PUT
+/api/partners/:id
+Admin JWT
+Edit partner details
+DELETE
+/api/partners/:id
+Admin JWT
+Delete partner → instant access revoke (V2)
+GET
+/api/tickets
+Admin JWT
+List all support tickets
+PUT
+/api/tickets/:id/resolve
+Admin JWT
+Mark ticket resolved
+
+PART J — WhatsApp Template Creation (Exact Steps)
+Templates are pre-approved message formats — needed ONLY when your business messages the customer FIRST, outside an active 24-hour service window. Customer-initiated flows (Hi, Place Order, menu buttons) need zero template approval.
+J.1 How to Create a Template
+Step 1: Go to developers.facebook.com → your Ironing Service app
+Step 2: Left sidebar → WhatsApp → Message Templates
+Step 3: Click 'Create Template'
+Step 4: Category = UTILITY (not Marketing — wrong category = higher cost or rejection)
+Step 5: Template Name = lowercase + underscores only, e.g. payment_request (cannot change after approval)
+Step 6: Language = English (en_US); add Tamil later as a separate template if needed
+Step 7: Body = message text with {{1}}, {{2}}… variables, max 1024 characters
+Step 8: Footer (optional, max 60 chars) and Buttons (optional, max 3) if needed
+Step 9: Submit for review — Meta approval typically takes minutes to a few hours
+J.2 Templates You Need — Exact Body Text
+Template Name
+Body Text (copy exactly)
+Variables
+pickup_assigned
+Hi {{1}}, your Order #{{2}} pickup is assigned! Our partner will reach you at {{3}}.
+{{1}}=name, {{2}}=order_id, {{3}}=time_slot
+cloth_check_issue
+We noticed an issue with Order #{{1}}: {{2}}. Photo attached. Do you accept? Reply YES or call us.
+{{1}}=order_id, {{2}}=issue_description — ADDED for V2 cloth-check step
+payment_request
+Order #{{1}} cloth count done! Total: ₹{{2}}. Pay now: {{3}} or pay cash to our partner.
+{{1}}=order_id, {{2}}=amount, {{3}}=razorpay_link
+payment_reminder
+Reminder: Order #{{1}} payment of ₹{{2}} is pending. Please pay to proceed: {{3}}
+{{1}}=order_id, {{2}}=amount, {{3}}=link
+order_collected
+Order #{{1}} collected ✅. Your clothes are on the way to our shop!
+{{1}}=order_id
+ironing_started
+Order #{{1}} ironing started 🔥. We'll notify you when it's ready.
+{{1}}=order_id
+order_ready
+Order #{{1}} is ready ✨! Out for delivery soon.
+{{1}}=order_id
+out_for_delivery
+Order #{{1}} is out for delivery 🚗. Expected by {{2}}.
+{{1}}=order_id, {{2}}=ETA
+order_delivered
+Order #{{1}} delivered ✅. Thank you! Download your invoice: {{2}}
+{{1}}=order_id, {{2}}=invoice_link
+Note: the original checklist had a template named damage_notice used for post-delivery damage. Renamed/duplicated here as cloth_check_issue for the pre-payment step (flow Section 6) — keep damage_notice as a separate template for post-delivery disputes (flow Section 9) since the two happen at different stages and may need different wording.
+J.3 Sending a Template in Code
+// services/whatsapp.jsasync function sendTemplate(to, templateName, variables) {  const response = await axios.post(    `https://graph.facebook.com/v18.0/${PHONE_ID}/messages`,    {      messaging_product: 'whatsapp',      to: to,      type: 'template',      template: {        name: templateName,        language: { code: 'en_US' },        components: [{          type: 'body',          parameters: variables.map(v => ({ type: 'text', text: v }))        }]      }    },    { headers: { Authorization: `Bearer ${TOKEN}` } }  );}// Usage:await sendTemplate('919876543210', 'payment_request', ['12345', '125', 'https://rzp.io/xxx']);
+
+PART K — WhatsApp Bot Flow (How the Code Works)
+K.1 Webhook Receive Flow
+// routes/webhook.js — POST /webhookrouter.post('/webhook', async (req, res) => {  const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];  if (!message) return res.sendStatus(200);  const from = message.from;      // customer phone number  const type = message.type;      // 'text' or 'interactive'  if (type === 'text') {    await handleTextMessage(from, message.text.body);  } else if (type === 'interactive') {    const buttonId = message.interactive.button_reply?.id;    const listId = message.interactive.list_reply?.id;    await handleButtonClick(from, buttonId || listId);  }  res.sendStatus(200); // always return 200 to Meta});
+K.2 Bot Logic (bot.js) — Matches Flow Sections 1 & 2
+async function handleTextMessage(from, text) {  const customer = await prisma.customer.findUnique({ where: { phone: from } });  if (!customer) {    await startRegistration(from);        // NEW customer (Section 1)  } else {    await sendMainMenu(from, customer.name); // EXISTING customer (Section 2)  }}async function handleButtonClick(from, buttonId) {  switch (buttonId) {    case 'place_order':      await startOrderFlow(from); break;    case 'check_order':      await showOrderStatus(from); break;    case 'price_list':       await sendPriceList(from); break;    case 'update_addr':      await startAddressUpdate(from); break;    case 'support':          await showSupportMenu(from); break;    // Place Order flow    case 'pickup_today':     await setPickupDate(from, 'today'); break;    case 'pickup_tomorrow':  await setPickupDate(from, 'tomorrow'); break;    case 'slot_morning':     await setPickupSlot(from, 'Morning'); break;    case 'slot_afternoon':   await setPickupSlot(from, 'Afternoon'); break;    case 'slot_evening':     await setPickupSlot(from, 'Evening'); break;    case 'confirm_yes':      await confirmOrder(from); break;   // pure INSERT    case 'confirm_no':       await sendMainMenu(from, ''); break;    // Cloth-check response (flow Section 6) — ADDED    case 'cloth_issue_yes':  await acceptClothIssue(from); break;    case 'cloth_issue_call': await escalateToSupport(from); break;    default: await sendFallback(from); // invalid input  }}
+⚠ acceptClothIssue() and escalateToSupport() are new handlers needed for flow Section 6 — the original checklist code sample stopped at order confirmation and didn't yet show the cloth-check response branch. Added here so the bot logic fully matches the diagram.
+
+PART L — Testing Before Moving to Production
+Full sequence, in order. Every flow-diagram section (1–10) has at least one corresponding test below — nothing skipped.
+#
+What to Test
+How to Test
+Pass Condition
+Flow Section
+1
+Local server starts
+node index.js → check terminal
+'Bot running on port 3000' shown
+Setup
+2
+ngrok tunnel works
+ngrok http 3000 → get URL
+https URL shows online
+Setup
+3
+Webhook verified by Meta
+Meta dashboard → webhook URL + verify token
+Green tick / 'Verify and Save' succeeds
+Setup
+4
+Bot receives 'Hi'
+Send 'Hi' from test number
+Bot replies with welcome + menu
+1
+5
+New customer registration
+Fresh phone number → Hi → enter name/address/location
+Customer saved in DB, menu shown
+1
+6
+Menu never blocks Place Order
+Tap menu while an order is active
+Place Order button still available
+2
+7
+Place Order full flow
+Tap Place Order → count → slot → confirm
+Order created with unique ID, pure INSERT
+3
+8
+Admin sees new order instantly
+Check admin dashboard after step 7
+Order appears without refresh delay
+3→4
+9
+Partner login works
+Open partner URL → login username+password
+JWT issued, today's jobs shown
+4→5
+10
+Cloth condition check
+Partner taps Reached → ticks issue checklist + photo
+Customer receives cloth_check_issue template with photo
+6
+11
+Cloth check acceptance
+Customer replies YES to issue notice
+Order unlocks to count/payment step
+6
+12
+Cloth count + payment request
+Partner enters counts → Send Payment
+Customer gets itemised bill + Razorpay link
+7
+13
+Razorpay payment (test mode)
+Click link → test card 4111 1111 1111 1111
+Webhook fires, status = Paid, Picked unlocks
+7
+14
+Picked button locked test
+Try tapping Picked before payment
+Button disabled, API returns 403
+7
+15
+No-block rule test
+Place 2nd order while 1st is active
+Both orders exist independently, different IDs
+10
+16
+Status push messages
+Admin marks order Ready
+Customer gets 'Order #X is Ready' message
+8
+17
+Invoice PDF
+After Delivered status, check WhatsApp
+PDF downloads with correct order details
+8
+18
+Post-delivery damage report
+Customer reports damage after delivery
+Support ticket created, admin notified
+9
+L.1 Razorpay Test Cards
+Card Number
+Expiry
+CVV
+Result
+4111 1111 1111 1111
+Any future date
+Any 3 digits
+✅ Payment Success
+5267 3181 8797 5449
+Any future date
+Any 3 digits
+✅ Payment Success
+4000 0000 0000 0002
+Any future date
+Any 3 digits
+❌ Payment Failed
+L.2 Go-Live Checklist (Do This Last)
+☐  All 18 tests above pass in staging
+☐  Meta template approvals received for every template in Part J.2
+☐  Razorpay switched from test keys to live keys in .env
+☐  Domain DNS points to Hostinger KVM 2 VPS IP
+☐  SSL certificate active (Certbot) on the production domain
+☐  PM2 process set to auto-restart on server reboot: pm2 startup && pm2 save
+☐  Meta webhook URL updated from ngrok to permanent production domain
+☐  Daily DB backup cron job confirmed running
+
+PART M — Security Checklist
+☐  JWT for Admin: role='admin', expires in 24h
+☐  JWT for Partner: role='partner', partnerId claim, expires in 24h
+☐  bcrypt for partner passwords: minimum cost factor 10
+☐  Meta webhook verification: X-Hub-Signature-256 header checked on every POST
+☐  Razorpay webhook signature verified (crypto.createHmac) before trusting payload
+☐  All secrets in .env — never committed to Git
+☐  HTTPS mandatory (Certbot SSL on Hostinger KVM 2)
+☐  .gitignore includes: .env, node_modules, dist
+☐  Input validation on all API endpoints (express-validator)
+☐  Rate limiting on /webhook and /api/payment/webhook endpoints (express-rate-limit)
+☐  Partner can only see their own orders (partnerId in JWT vs order.partnerId)
+☐  Cloth-check photo uploads validated for file type/size before storing (S3/Cloudinary)
+☐  Admin-delete-partner instantly invalidates that partner's active JWTs (blocklist or short expiry + re-check active flag)
+End of Complete Architecture Addendum.
+
+PART N — Antigravity Agent Prompts (Phase-by-Phase, Copy-Paste Ready)
+Give these to your Antigravity agent one phase at a time, in this exact order. Do not skip ahead — each phase depends on the previous one being committed to git. After each phase: review the Artifact the agent produces, test it, then git commit before pasting the next prompt.
+⚠ Set Antigravity mode to Agent-assisted (not full Autopilot) for Phases 1–5 so you can review file changes before they're applied. Model: Claude Sonnet for backend/payment/security phases, either model is fine for frontend UI phases.
+PHASE 1 — Backend Scaffold + Database
+Set up a Node.js + Express.js backend in a folder called ironing-bot/ with this exact structure:ironing-bot/├── src/│   ├── routes/ (webhook.js, orders.js, partners.js, payment.js, auth.js)│   ├── services/ (whatsapp.js, bot.js, razorpay.js, pdf.js)│   ├── middleware/ (auth.js, validate.js)│   └── prisma/schema.prisma├── index.js├── .env.example└── package.jsonUse PostgreSQL + Prisma ORM. Create the schema.prisma with these models: Customer, Partner, Order, OrderItem, SupportTicket — with these exact fields:Customer: phone (String, id), name, address, latitude (Float?), longitude (Float?), landmark (String?), createdAt.Partner: id (autoincrement), name, phone, username (unique — V2 ID+Password login), password (hashed, bcrypt), active (Boolean default true).Order: id (autoincrement), customerPhone (FK to Customer), partnerId (FK to Partner, optional), status (default 'Confirmed'), paymentStatus (default 'Pending'), paymentMethod (optional), totalAmount, pickupDate, pickupSlot, clothCheckStatus (default 'None'), clothCheckNote, clothPhotoUrl, reachedAt, pickedAt, createdAt, updatedAt.OrderItem: id, orderId (FK), itemType, quantity, rate, subtotal.SupportTicket: id, customerPhone, orderId (optional), category, status (default 'Open'), createdAt.Set up index.js as the Express app entry point with dotenv config, JSON body parsing (except raw for /api/payment/webhook which needs raw body for signature verification), and route mounting for all five route files. Run prisma migrate dev to create the initial migration. Do not implement route logic yet — just create the files with empty router exports.
+✅ Before moving to next phase: npm install runs clean, npx prisma migrate dev succeeds, node index.js starts without errors, and git log shows the scaffold commit.
+PHASE 2 — WhatsApp Webhook + Bot Flow
+In ironing-bot/src/routes/webhook.js, implement:- GET /webhook for Meta's one-time webhook verification (hub.mode, hub.verify_token, hub.challenge query params — verify against process.env.WEBHOOK_VERIFY_TOKEN and echo back hub.challenge).- POST /webhook that extracts req.body.entry[0].changes[0].value.messages[0], gets 'from' and 'type', routes text messages to handleTextMessage() and interactive/button messages to handleButtonClick(), and always returns res.sendStatus(200).In ironing-bot/src/services/bot.js implement the full customer-facing flow:1. handleTextMessage(from, text): if no Customer row exists for this phone, start registration (collect name, address, ask them to share location, landmark). If exists, send the 5-button main menu (Place Order / Check Order / Price List / Update Address / Contact Support). The menu must NEVER check for active orders — Place Order is always available.2. handleButtonClick(from, buttonId): switch on place_order, check_order, price_list, update_addr, support, and the order-flow sub-buttons (pickup_today/tomorrow, slot_morning/afternoon/evening, confirm_yes/confirm_no). confirm_yes must be a pure INSERT into Order + OrderItem — never read or modify any other existing order for that customer.3. Check Order: if customer has 1 active order show status directly; if 2+, show a numbered list and let them reply with a number.4. Cancel: only allowed if order status is before 'Collected'.Implement services/whatsapp.js with a sendMessage(to, text) function and a sendButtons(to, text, buttons) function using the WhatsApp Cloud API (graph.facebook.com/v18.0/{PHONE_ID}/messages) with axios, reading PHONE_ID and WHATSAPP_TOKEN from .env.
+✅ Before moving to next phase: using ngrok + a Meta test number, sending 'Hi' returns the welcome+menu, and a full Place Order flow creates a new row in the Order table without touching any existing order.
+PHASE 3 — Partner Dashboard (React + Vite)
+Create a React + Vite app in ironing-partner/ with this structure:ironing-partner/src/pages/: Login.jsx, JobList.jsx, JobDetail.jsx, ClothCheck.jsx, CountClothes.jsxLogin.jsx: username + password form, POSTs to /api/auth/partner/login, stores the returned JWT, redirects to JobList on success.JobList.jsx: calls GET /api/partner/jobs (with JWT in Authorization header), shows only today's jobs assigned to the logged-in partner, with Navigate / Reached / Can't Make It / Not Available actions per job.JobDetail.jsx: Navigate opens Google Maps using the order's stored latitude/longitude. Reached calls PUT /api/partner/jobs/:id/reached and then routes to ClothCheck.jsx.ClothCheck.jsx: a checklist (Button missing / Torn / Stain / Burnt / Faded / Other) with an optional photo upload, submits to POST /api/partner/jobs/:id/cloth-check. If no issues are ticked, skip straight to CountClothes.jsx. If issues are ticked, show a waiting state until the customer accepts (poll or use the order's clothCheckStatus).CountClothes.jsx: a per-item counter (Shirt ₹15, Pant ₹20, Saree ₹40, T-Shirt ₹15, Coat ₹50) with a running total, a 'Send Payment Request' button that calls POST /api/partner/jobs/:id/count, then shows the Picked button (disabled/locked until paymentStatus becomes 'Paid'), plus a 'Cash Received' button that calls POST /api/partner/jobs/:id/cash-received.Style: keep it simple and mobile-first — this is used by partners on their phones in the field, not a desktop admin tool.
+✅ Before moving to next phase: a test partner account can log in, see only their own assigned jobs, and walk through Reached → Cloth Check → Count → Payment → Picked without seeing any other partner's orders.
+PHASE 4 — Razorpay Integration
+In ironing-bot/src/services/razorpay.js, implement createPaymentLink(orderId, amount, customerPhone, customerName) using the razorpay npm package:- Initialize Razorpay with key_id/key_secret from .env.- Create a payment link with amount in paise (amount * 100), currency INR, description 'Ironing Service - Order #{orderId}', customer name+contact, notify.sms/email both false (we notify via WhatsApp ourselves), callback_url pointing at our domain.- Return the short_url.In ironing-bot/src/routes/payment.js implement POST /api/payment/webhook:- Use express.raw({type:'application/json'}) as the body parser for this route only.- Verify the x-razorpay-signature header using crypto.createHmac('sha256', RAZORPAY_KEY_SECRET) against the raw body — reject with 400 if it doesn't match.- On event 'payment_link.paid', parse the order ID out of the description, update that Order's paymentStatus to 'Paid' and paymentMethod to 'Razorpay', and always respond 200 to Razorpay.Wire createPaymentLink() into the payment-request step of the bot flow (after Partner submits the cloth count), and send the customer a WhatsApp message with the itemised bill + the Razorpay link + a note that they can also pay cash to the partner.Use these test cards to verify locally: 4111 1111 1111 1111 (success), 5267 3181 8797 5449 (success), 4000 0000 0000 0002 (failure).
+✅ Before moving to next phase: a test payment via 4111 1111 1111 1111 fires the webhook, flips paymentStatus to 'Paid', and unlocks the Picked button in the Partner Dashboard automatically.
+PHASE 5 — Admin Dashboard (React + Vite)
+Create a React + Vite app in ironing-admin/ with pages: Login.jsx, Dashboard.jsx, Orders.jsx, Partners.jsx, Tickets.jsx.Login.jsx: username+password, POSTs to /api/auth/admin/login, stores JWT.Dashboard.jsx: today's summary (total orders, pending payment, unassigned orders), order status counts, last 10 orders with a quick-assign action, and red-highlighted unassigned alerts.Orders.jsx: full orders list with filters (status, date, partner, payment status), an order detail view (all fields + items + customer map link + status timeline), an Assign Partner dropdown (PUT /api/orders/:id/assign), an Update Status control (PUT /api/orders/:id/status), a Cancel button (only enabled if status is before 'Collected'), and a bulk-select + 'Mark Ready' action (POST /api/orders/:id/bulk-ready for each selected order).Partners.jsx: list + create/edit/delete partner accounts (name, phone, username, password) via GET/POST/PUT/DELETE /api/partners — deleting must instantly revoke that partner's dashboard access.Tickets.jsx: list support tickets (GET /api/tickets), mark resolved (PUT /api/tickets/:id/resolve).Protect all pages behind the stored admin JWT — redirect to Login if missing/expired (24h expiry).
+✅ Before moving to next phase: an admin can log in, assign a partner to a new order, watch it move through statuses, and deleting a partner immediately locks that partner out of their dashboard.
+PHASE 6 — WhatsApp Template Creation & Sending
+Implement services/whatsapp.js → sendTemplate(to, templateName, variables) that POSTs to graph.facebook.com/v18.0/{PHONE_ID}/messages with type 'template', language en_US, and body parameters mapped from the variables array.Wire sendTemplate() into the status-push logic so each of these events sends the matching template:pickup_assigned → when partner is assignedcloth_check_issue → when partner finds an issue during cloth check (before payment)payment_request → after partner submits the cloth countpayment_reminder → 30 minutes after payment_request if still unpaidorder_collected → when partner taps Pickedironing_started, order_ready, out_for_delivery, order_delivered → as admin/partner updates statusNote: these templates must be created and approved in Meta Business Manager (WhatsApp → Message Templates, category UTILITY) before this code will work in production — test with dummy templates in sandbox mode first if approval is pending.
+✅ Before moving to next phase: triggering each status change in the Admin Dashboard sends the correctly-formatted WhatsApp message to a test number (using placeholder/sandbox templates if Meta approval is still pending).
+PHASE 7 — Full Testing Sequence
+Run through and confirm each of these, in order, before touching production:1. node index.js starts and shows 'Bot running on port 3000'2. ngrok http 3000 gives a working https URL3. Meta webhook verification succeeds (green tick)4. Sending 'Hi' returns welcome + menu5. A brand-new phone number completes registration and is saved in the DB6. Full Place Order flow creates a new Order row with a unique ID7. Partner login returns a JWT and shows only that partner's jobs8. Cloth check with an issue ticked sends the cloth_check_issue template with photo to the customer9. Customer replying YES unlocks the count/payment step10. Submitting a cloth count sends the itemised bill + Razorpay link11. Paying with test card 4111 1111 1111 1111 flips paymentStatus to Paid and unlocks Picked12. Tapping Picked before payment is confirmed returns a 40313. Placing a second order while the first is still active creates an independent row with a different ID14. Marking an order Ready in Admin sends the order_ready WhatsApp push15. After Delivered, the invoice PDF link works and has correct order details16. Reporting damage post-delivery creates a support ticket without affecting any other orderFix any failing step before moving to Phase 8 — do not deploy with a failing test.
+✅ Before moving to next phase: all 16 checks above pass locally with ngrok before you touch the production server.
+PHASE 8 — Hostinger KVM 2 Deployment
+Help me deploy this project to my Hostinger KVM 2 VPS (8GB RAM / 2 vCPU / 100GB NVMe). Steps to script/verify:1. SSH in, apt update && upgrade.2. Install Node.js 20 LTS, PostgreSQL 16, PM2 (npm install -g pm2), Nginx, Certbot.3. Create the production Postgres DB + user, set DATABASE_URL in ironing-bot/.env, run npx prisma migrate deploy.4. Build both React apps locally (npm run build in ironing-admin/ and ironing-partner/) and upload the dist/ folders via SFTP.5. Configure Nginx to: proxy the bot's webhook + API routes to localhost:3000, and serve the two React dist/ builds as static files on their own paths/subdomains.6. Start the bot with pm2 start index.js --name ironing-bot, then pm2 startup && pm2 save so it survives reboots.7. Get SSL with sudo certbot --nginx -d yourdomain.com.8. Update the Meta webhook URL from the ngrok URL to the permanent production domain.9. Switch Razorpay keys from test to live in the production .env only.10. Set up a daily pg_dump cron job for backups.Confirm each step works before moving to the next — this is a live production server.
+✅ Before moving to next phase: the bot responds to WhatsApp messages via the production domain, both dashboards load over HTTPS, and a real (or live-mode test) payment completes end-to-end.
+End of Antigravity Prompt Guide.

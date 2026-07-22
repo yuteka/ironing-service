@@ -1,0 +1,842 @@
+﻿Ironing Service
+Field Analysis + Dashboard Modules + Mandatory vs Optional
+Based on your final flow V2  ·  KVM 2 Hostinger  ·  ID+Password Partner Login  ·  Cloth Check Before Pre-Payment
+🔴 MANDATORY  =  Must build for V1 launch       🟡 OPTIONAL  =  Can add later without breaking anything
+SECTION 1 — COMPLETE DATABASE FIELDS ANALYSIS (FROM YOUR FLOW V2)
+
+Every field identified from your draw.io flow — what data needs to be stored, what type, and whether it is mandatory or optional.
+
+1.1  customers table
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+phone
+VARCHAR(20)
+MANDATORY
+(required)
+Primary key — used to identify customer on every Hi
+name
+VARCHAR(100)
+MANDATORY
+(required)
+Collected during new customer registration
+address
+TEXT
+MANDATORY
+(required)
+Street address for pickup
+latitude
+DECIMAL(10,8)
+MANDATORY
+(required)
+From Google Map share — used for Navigate button
+longitude
+DECIMAL(11,8)
+MANDATORY
+(required)
+From Google Map share — used for Navigate button
+landmark
+VARCHAR(200)
+OPTIONAL
+NULL
+Helps partner find location easier
+created_at
+TIMESTAMP
+MANDATORY
+NOW()
+Auto-set when customer first registers
+updated_at
+TIMESTAMP
+MANDATORY
+NOW()
+Updated when address changes via Update Address
+
+1.2  orders table
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Unique Order ID shown in all messages as #12345
+customer_phone
+VARCHAR(20)
+MANDATORY
+(required)
+Foreign key → customers.phone
+partner_id
+INT
+OPTIONAL
+NULL
+Set when admin assigns partner
+status
+VARCHAR(50)
+MANDATORY
+Confirmed
+Confirmed→Pickup Assigned→Collected→Reached Shop→Ironing Started→Ready→Out for Delivery→Delivered
+payment_status
+VARCHAR(20)
+MANDATORY
+Pending
+Pending→Paid — controls Picked button lock
+payment_method
+VARCHAR(20)
+OPTIONAL
+NULL
+Razorpay or Cash — set after payment
+razorpay_link
+TEXT
+OPTIONAL
+NULL
+Stored so it can be resent if expired
+total_amount
+DECIMAL(10,2)
+MANDATORY
+0
+Calculated from order_items after partner counts
+pickup_date
+VARCHAR(20)
+MANDATORY
+(required)
+Today or Tomorrow — selected by customer
+pickup_slot
+VARCHAR(20)
+MANDATORY
+(required)
+Morning / Afternoon / Evening
+cloth_check_status
+VARCHAR(20)
+OPTIONAL
+None
+None / Issues Found / Customer Accepted — V2 change
+cloth_check_note
+TEXT
+OPTIONAL
+NULL
+Issue description from checklist
+cloth_photo_url
+TEXT
+OPTIONAL
+NULL
+S3/Cloudinary URL of cloth condition photo
+reached_at
+TIMESTAMP
+OPTIONAL
+NULL
+Logged when partner taps Reached
+picked_at
+TIMESTAMP
+OPTIONAL
+NULL
+Logged when partner taps Picked — SLA/dispute reference
+created_at
+TIMESTAMP
+MANDATORY
+NOW()
+When customer confirmed order
+updated_at
+TIMESTAMP
+MANDATORY
+NOW()
+Updated on every status change
+
+1.3  order_items table
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Primary key
+order_id
+INT
+MANDATORY
+(required)
+Foreign key → orders.id
+item_type
+VARCHAR(50)
+MANDATORY
+(required)
+Shirt / Pant / Saree / T-Shirt / Coat
+quantity
+INT
+MANDATORY
+(required)
+Entered by partner during physical count — NOT customer estimate
+rate
+DECIMAL(10,2)
+MANDATORY
+(required)
+₹15/₹20/₹40 — pulled from price catalog
+subtotal
+DECIMAL(10,2)
+MANDATORY
+(required)
+quantity × rate — auto-calculated
+
+1.4  partners table  (V2: ID + Password login)
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Primary key
+name
+VARCHAR(100)
+MANDATORY
+(required)
+Display name shown in admin dropdown
+phone
+VARCHAR(20)
+MANDATORY
+(required)
+Contact number — admin calls partner if needed
+username
+VARCHAR(50)
+MANDATORY
+(required)
+Unique — partner uses this to login (V2)
+password_hash
+VARCHAR(255)
+MANDATORY
+(required)
+bcrypt hashed — NEVER store plain text (V2)
+active
+BOOLEAN
+MANDATORY
+TRUE
+FALSE = deleted/inactive, cannot login
+created_at
+TIMESTAMP
+MANDATORY
+NOW()
+When admin created account
+
+1.5  support_tickets table
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Primary key
+customer_phone
+VARCHAR(20)
+MANDATORY
+(required)
+Foreign key → customers.phone
+order_id
+INT
+OPTIONAL
+NULL
+Linked order if category is order-related
+category
+VARCHAR(50)
+MANDATORY
+(required)
+ClothMissing / Damage / Delay / Payment / Other
+description
+TEXT
+OPTIONAL
+NULL
+Customer freetext — optional in V1
+status
+VARCHAR(20)
+MANDATORY
+Open
+Open / InProgress / Resolved
+created_at
+TIMESTAMP
+MANDATORY
+NOW()
+When ticket was raised
+resolved_at
+TIMESTAMP
+OPTIONAL
+NULL
+Set when admin resolves
+
+1.6  price_catalog table  (admin-editable)
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Primary key
+item_name
+VARCHAR(50)
+MANDATORY
+(required)
+Shirt / Pant / Saree / T-Shirt / Coat
+rate
+DECIMAL(10,2)
+MANDATORY
+(required)
+₹ per item — admin changes this in dashboard
+active
+BOOLEAN
+MANDATORY
+TRUE
+Hide/show item in bot price list
+updated_at
+TIMESTAMP
+MANDATORY
+NOW()
+When price was last changed
+
+1.7  webhook_logs table  (debugging)
+Field Name
+Data Type
+Mandatory?
+Default
+Notes from Flow
+id
+INT AUTO_INCREMENT
+MANDATORY
+auto
+Primary key
+payload
+JSON
+MANDATORY
+(required)
+Full raw webhook body from Meta
+source
+VARCHAR(20)
+MANDATORY
+(required)
+WhatsApp or Razorpay
+received_at
+TIMESTAMP
+MANDATORY
+NOW()
+When webhook arrived
+processed
+BOOLEAN
+MANDATORY
+FALSE
+TRUE after handled successfully
+
+
+SECTION 2 — MANDATORY vs OPTIONAL: FULL FEATURE LIST FROM YOUR FLOW
+
+Based on your V2 flow — everything marked clearly so you know what must be built first.
+
+2.1  Customer WhatsApp Bot
+Feature
+Status
+Why
+Hi → DB check → new/existing branch
+MANDATORY
+Entry point — without this nothing works
+New customer registration (name, address, map, landmark)
+MANDATORY
+Required to store delivery location
+5-button main menu
+MANDATORY
+Core navigation — all flows start from here
+Place Order (count, date, slot, confirm)
+MANDATORY
+Core revenue flow
+Check Order (status display)
+MANDATORY
+Customer needs to track orders
+Price List display
+MANDATORY
+Customers ask pricing before ordering
+Update Address
+MANDATORY
+Customers move — must update delivery location
+Contact Support (5 categories → ticket)
+MANDATORY
+Business needs complaint management
+Cancel order (before Collected)
+MANDATORY
+Customer may change mind — must handle cleanly
+Auto status push messages (all stages)
+MANDATORY
+Eliminates 'where is my order' calls to business
+Pre-payment: itemised bill + Razorpay link
+MANDATORY
+Core business model — clothes not taken without payment
+Fallback handler (types instead of button)
+OPTIONAL
+Nice to have — prevents confusion but not blocking
+Minimum order check (5 clothes)
+OPTIONAL
+Business decision — can skip for V1 and enforce manually
+Soft info note (has active order warning)
+OPTIONAL
+PM improvement — good UX but not blocking
+Multi-order numbered list (Check Order)
+OPTIONAL
+Needed only when customer has 2+ active orders
+Invoice PDF download after delivery
+OPTIONAL
+PM improvement — nice to have, add after V1 launch
+Cloth condition check + customer notification
+OPTIONAL
+Dispute prevention — important but not blocking for launch
+Payment dispute timeout (30 min auto-cancel)
+OPTIONAL
+Edge case — handle manually in V1, automate later
+Post-delivery damage report flow
+OPTIONAL
+Support ticket covers this in V1
+
+
+SECTION 3 — ADMIN DASHBOARD: EVERY MODULE + FIELD
+
+React.js (Vite) — internal tool, admin logs in with username+password, sees full system.
+
+3.1  Admin Login Page
+Module
+Fields
+Mandatory?
+Notes
+Login Page
+Username, Password, Login button
+MANDATORY
+JWT stored in localStorage on success
+Session handling
+Auto logout after 24h token expiry
+MANDATORY
+Show re-login prompt
+
+3.2  Dashboard / Home
+Module
+Fields / Widgets
+Mandatory?
+Notes
+Today's Summary
+Total orders today, Pending payment, Unassigned orders
+MANDATORY
+First thing admin sees
+Order Status Cards
+Counts by status: Confirmed/Assigned/Collected/Ironing/Ready
+MANDATORY
+Quick overview
+Recent Orders List
+Last 10 orders with status + quick assign button
+MANDATORY
+Fast action from home
+Unassigned Alerts
+Red highlight for orders with no partner assigned
+MANDATORY
+Prevents missed pickups
+Revenue Today
+Total amount collected today (paid orders)
+OPTIONAL
+Nice-to-have metric
+Charts / Analytics
+Order trends, peak hours, top customers
+OPTIONAL
+Add after V1 launch
+
+3.3  Orders Module
+Feature
+Fields Shown
+Mandatory?
+Notes
+Orders List
+Order ID, Customer name, Phone, Status, Partner, Amount, Date, Slot
+MANDATORY
+Main working view for admin
+Filter / Search
+Filter by: Status, Date, Partner, Payment status
+MANDATORY
+Essential for busy days
+Order Detail Page
+All order fields + items list + customer map link + timeline
+MANDATORY
+Full order context
+Assign Partner
+Dropdown: select partner → save → partner notified
+MANDATORY
+Core admin action
+Update Status
+Dropdown: change status → WhatsApp push fires
+MANDATORY
+Admin moves order through stages
+Cancel Order
+Cancel button (only before Collected)
+MANDATORY
+Must match bot logic
+Bulk Mark Ready
+Checkbox select all + Mark Ready button
+MANDATORY
+Essential for 40-50 morning orders
+Order Timeline
+Status history with timestamps
+OPTIONAL
+Good for disputes
+Cloth Check View
+View partner's checklist + photo if uploaded
+OPTIONAL
+For dispute reference
+Download Invoice
+Generate PDF for any delivered order
+OPTIONAL
+PM improvement
+
+3.4  Partners Module  (V2: ID + Password)
+Feature
+Fields
+Mandatory?
+Notes
+Partners List
+Name, Phone, Username, Active status, Orders today
+MANDATORY
+Admin manages all partners
+Add Partner Form
+Name*, Phone*, Username*, Password*, Active toggle
+MANDATORY
+V2: creates login credentials
+Edit Partner
+Name, Phone, Username, Reset Password option
+MANDATORY
+Update details anytime
+Delete Partner
+Confirm dialog → delete → instant access revoke
+MANDATORY
+V2: replaces expiring link
+Active/Inactive toggle
+Toggle without deleting
+MANDATORY
+Partner on leave — deactivate, reactivate later
+Partner Performance
+Orders completed, avg time, complaints
+OPTIONAL
+Phase 2
+
+3.5  Support Tickets Module
+Feature
+Fields
+Mandatory?
+Notes
+Tickets List
+Ticket ID, Customer, Order ID, Category, Status, Date
+MANDATORY
+Admin sees all complaints
+Ticket Detail
+Full details + linked order + customer history
+MANDATORY
+Context for resolution
+Resolve Ticket
+Resolve button + notes field
+MANDATORY
+Admin closes ticket
+Filter Tickets
+By category, status, date
+OPTIONAL
+Nice-to-have
+
+3.6  Price Catalog Module
+Feature
+Fields
+Mandatory?
+Notes
+Price List View
+Item name, Rate per item, Active toggle
+MANDATORY
+Bot pulls from this table
+Edit Price
+Rate input field, Save button
+MANDATORY
+Without this, code change needed for every price update
+Add/Remove Items
+Add new cloth type, deactivate old
+OPTIONAL
+Current 5 items enough for V1
+
+3.7  Settings Module
+Feature
+Fields
+Mandatory?
+Notes
+Admin Profile
+Name, Email, Change password
+MANDATORY
+Basic account management
+Minimum Order Setting
+Min clothes count (currently 5)
+OPTIONAL
+Can be hardcoded in V1
+Payment Timeout
+Minutes before payment reminder sent (default 30)
+OPTIONAL
+Can be hardcoded in V1
+WhatsApp Token Renewal
+Paste new token when expired
+MANDATORY
+Without this bot stops working
+
+
+SECTION 4 — PARTNER DASHBOARD: EVERY MODULE + FIELD  (V2: Login with ID + Password)
+
+React.js (Vite) — mobile-optimized, partner logs in with username + password, sees ONLY their assigned jobs.
+
+4.1  Partner Login Page
+Module
+Fields
+Mandatory?
+Notes
+Login Page
+Username input, Password input, Login button
+MANDATORY
+V2 change — replaces expiring link
+JWT storage
+Token stored in localStorage
+MANDATORY
+Auto-logout when token expires
+Error handling
+Wrong password → clear error message
+MANDATORY
+Partner must know what went wrong
+
+4.2  Today's Jobs List
+Module
+Fields Shown
+Mandatory?
+Notes
+Jobs List
+Order ID, Customer name, Address, Pickup slot, Status
+MANDATORY
+Shows ONLY today's assigned orders for this partner
+Empty state
+'No jobs assigned today' message
+MANDATORY
+Handle gracefully
+Job card
+Status badge, quick action buttons visible
+MANDATORY
+Mobile-first design
+
+4.3  Job Detail Page (Single Order)
+Button / Feature
+What It Does
+Mandatory?
+Notes
+📍 Navigate
+Opens Google Maps app with lat/long → no typing
+MANDATORY
+Core feature — partner must not search manually
+📞 Call Customer
+Opens phone dialer with customer number
+MANDATORY
+Partner needs to call if lost
+✅ Reached
+Logs timestamp, enables cloth check + count flow
+MANDATORY
+Required before any next step
+❌ Can't Make It
+Partner-side issue → order goes Unassigned
+MANDATORY
+Partner must report if cannot do job
+🏠 Not Available
+Customer not home → same partner, reschedule
+MANDATORY
+Different from Can't Make It — same partner kept
+Customer address display
+Full address + landmark shown clearly
+MANDATORY
+Partner needs to find location
+Pickup slot display
+Morning/Afternoon/Evening shown
+MANDATORY
+Partner knows when to go
+Order item count (estimate)
+Shows customer's stated count for reference
+OPTIONAL
+Actual count done separately during cloth check
+
+4.4  Cloth Condition Check  (V2: BEFORE Pre-Payment)
+Feature
+Fields
+Mandatory?
+Notes
+Condition checkboxes
+Button missing / Torn / Stain / Already burnt / Color faded / Other
+OPTIONAL
+Partner ticks if any issue found — V2: happens before count
+Photo upload
+Camera/file upload → stores to Cloudinary or S3
+OPTIONAL
+Recommended when issues found
+'No Issues' fast path
+Single tap: No issues → proceed directly to count
+MANDATORY
+Most cases will be clean — must be fast
+Submit condition
+Saves checklist + photo → triggers customer WhatsApp
+OPTIONAL
+Required only if issues found
+
+4.5  Cloth Count + Pre-Payment  (Core Pre-Payment Flow)
+Feature
+Fields
+Mandatory?
+Notes
+Count UI
+Shirt [−][+] / Pant [−][+] / Saree [−][+] / T-Shirt [−][+] / Coat [−][+]
+MANDATORY
+Partner enters actual cloth count — not customer estimate
+Auto total
+Total calculated live as partner enters counts
+MANDATORY
+₹125 shown before sending request
+Send Payment Request
+Button → sends WhatsApp to customer with itemised bill
+MANDATORY
+Core pre-payment trigger
+Payment status display
+Shows: Waiting for payment / Paid / Cash Received
+MANDATORY
+Partner knows when to collect
+Cash Received button
+Partner taps after collecting cash → unlocks Picked
+MANDATORY
+Cash payment confirmation
+Recount button
+Partner can recount if customer disputes
+MANDATORY
+New count → new payment request sent
+Not Paying button
+Customer refuses → admin notified → order cancelled
+OPTIONAL
+Edge case — handle gracefully
+
+4.6  Picked Confirmation
+Feature
+Fields
+Mandatory?
+Notes
+Picked button
+LOCKED until payment confirmed
+MANDATORY
+🔴 Hardcoded rule — cannot bypass
+Confirmation dialog
+'Confirm you have collected all clothes?' Yes/No
+MANDATORY
+Prevent accidental tap
+Picked timestamp
+Auto-logged when confirmed
+MANDATORY
+Used for SLA tracking and disputes
+
+
+SECTION 5 — V2 CHANGES: HOW TO IMPLEMENT IN CODE
+
+5.1  Partner Login (ID + Password) — Backend
+In routes/auth.js:
+POST /api/auth/partner/login
+  → Receive username + password
+  → Find partner by username in DB
+  → bcrypt.compare(password, partner.password_hash)
+  → If match: issue JWT with { partnerId, role: 'partner' }
+  → If no match: return 401 Unauthorized
+
+In middleware/auth.js — protect partner routes:
+  → Verify JWT → check role === 'partner'
+  → Add req.partnerId = token.partnerId
+  → In GET /api/partner/jobs: WHERE partner_id = req.partnerId
+  → Partner sees ONLY their own jobs — cannot see others
+
+5.2  Cloth Check Before Pre-Payment — Logic Flow
+Step
+Old V1 Order
+New V2 Order (Your Correction)
+1
+Partner taps Reached
+Partner taps Reached
+2
+Partner counts clothes
+Partner checks cloth condition ← NEW POSITION
+3
+Payment request sent
+Customer accepts/auto-accepts condition
+4
+Customer pays
+Partner counts actual clothes
+5
+Partner taps Picked
+Payment request sent to customer
+6
+—
+Customer pays (Razorpay or cash)
+7
+—
+Partner taps Picked (unlocked)
+
+Why this order is correct: Cloth condition must be documented and customer must accept BEFORE the cloth count and payment. If a dispute is raised after payment, it becomes harder to resolve. Cloth check before payment = clean record before any money changes hands.
+
+
+SECTION 6 — HOSTINGER KVM 2: WHY IT IS BETTER + EXACT SETUP
+
+You said you have KVM 2 — this is actually better than KVM 1 for this project.
+
+Spec
+KVM 1
+KVM 2 (Yours) ✅
+RAM
+4 GB
+8 GB — runs PostgreSQL + Node.js + Nginx comfortably
+vCPU
+1 core
+2 cores — handles concurrent WhatsApp webhooks better
+Storage
+50 GB NVMe
+100 GB NVMe — space for logs, images, invoices
+What you can run
+Bot + DB + Nginx (tight)
+Bot + DB + Nginx + Cloudinary backup + PM2 + monitoring
+Scale
+~100 orders/month
+~500+ orders/month easily
+
+KVM 2 Setup Sequence
+🔴 MANDATORY  SSH in: ssh root@your-vps-ip
+🔴 MANDATORY  Update server: sudo apt update && sudo apt upgrade -y
+🔴 MANDATORY  Install Node.js 20 LTS (see previous document for commands)
+🔴 MANDATORY  Install PostgreSQL 16: sudo apt install postgresql-16 -y
+🔴 MANDATORY  Install PM2: npm install -g pm2
+🔴 MANDATORY  Install Nginx: sudo apt install nginx -y
+🔴 MANDATORY  Install Certbot SSL: sudo apt install certbot python3-certbot-nginx -y
+🔴 MANDATORY  Create DB + user + grant privileges (see previous document)
+🔴 MANDATORY  Clone repo + npm install + configure .env
+🔴 MANDATORY  Run Prisma migrations: npx prisma migrate deploy
+🔴 MANDATORY  Start with PM2: pm2 start index.js --name ironing-bot
+🔴 MANDATORY  Configure Nginx (bot webhook + admin static + partner static)
+🔴 MANDATORY  SSL: sudo certbot --nginx -d yourdomain.com
+🔴 MANDATORY  Build React frontends locally + upload dist/ via SFTP
+🔴 MANDATORY  Update Meta webhook URL to permanent domain
+🟡 OPTIONAL   Install fail2ban for SSH security: sudo apt install fail2ban
+🟡 OPTIONAL   Setup UFW firewall: sudo ufw allow 80,443,22/tcp
+🟡 OPTIONAL   Daily DB backup cron job
+
+
+BUILD ORDER — START HERE
+1. Backend: Express server + Prisma schema + PostgreSQL on Hostinger KVM 2
+2. WhatsApp: Webhook receive + bot flow (Hi → menu → place order → status push)
+3. Partner Dashboard: Login + jobs list + cloth check + count + payment + Picked
+4. Razorpay: Payment link creation + webhook confirmation + Picked button unlock
+5. Admin Dashboard: Login + orders + bulk ready + partner CRUD (ID+Password) + tickets
+6. Testing: All 14 test cases → move to Hostinger production → Meta template approval → Go live

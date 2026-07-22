@@ -44,22 +44,9 @@ async function handleTextMessage(from, message) {
     where: { phone: from }
   });
 
-  // If customer doesn't exist, initiate registration flow
-  if (!customer) {
-    if (!chatStates[from]) {
-      chatStates[from] = { state: STATES.REG_AWAIT_NAME, tempDetails: {} };
-      await whatsapp.sendMessage(from, `Welcome to Ironing Service! 👋 Looks like you're new here.\n\nWhat's your name?`);
-      return;
-    }
-
-    const textBody = (message.text?.body || '').trim().toLowerCase();
-    const GREETINGS = ['hi', 'hello', 'hey', 'start', 'menu', 'hola', 'hy', 'hii', 'hiii', 'hi2'];
-    if (chatStates[from].state === STATES.REG_AWAIT_NAME && GREETINGS.includes(textBody)) {
-      await whatsapp.sendMessage(from, `Welcome to Ironing Service! 👋 Looks like you're new here.\n\nWhat's your name?`);
-      return;
-    }
-
-    await handleRegistration(from, message);
+  // If customer doesn't exist OR has pending registration, initiate registration flow
+  if (!customer || customer.address === 'PENDING_ADDRESS') {
+    await handleRegistration(from, message, customer);
     return;
   }
 
@@ -245,37 +232,47 @@ async function handleButtonClick(from, buttonId) {
 /**
  * Handle step-by-step registration messages.
  */
-async function handleRegistration(from, message) {
-  const session = chatStates[from];
+async function handleRegistration(from, message, existingCustomer) {
   const text = (message.text?.body || '').trim();
+  const lowerText = text.toLowerCase();
+  const GREETINGS = ['hi', 'hello', 'hey', 'start', 'menu', 'hola', 'hy', 'hii', 'hiii', 'hi2'];
 
-  if (session.state === STATES.REG_AWAIT_NAME) {
-    const lowerText = text.toLowerCase();
-    const GREETINGS = ['hi', 'hello', 'hey', 'start', 'menu', 'hola', 'hy', 'hii', 'hiii', 'hi2'];
-
+  if (!existingCustomer) {
     if (!text || GREETINGS.includes(lowerText)) {
       await whatsapp.sendMessage(from, `Welcome to Ironing Service! 👋 Looks like you're new here.\n\nWhat's your name?`);
       return;
     }
-    session.tempDetails.name = text;
-    session.state = STATES.REG_AWAIT_ADDRESS;
+
+    // Customer entered name (e.g. Yuteka) -> Save to DB immediately!
+    await prisma.customer.create({
+      data: {
+        phone: from,
+        name: text,
+        address: 'PENDING_ADDRESS'
+      }
+    });
+
     await whatsapp.sendMessage(from, `Nice to meet you, ${text}! 👋\n\nGreat! Please share your pickup address.`);
     return;
   }
 
-  if (session.state === STATES.REG_AWAIT_ADDRESS) {
-    const lowerText = text.toLowerCase();
-    const GREETINGS = ['hi', 'hello', 'hey', 'start', 'menu', 'hola', 'hy', 'hii', 'hiii', 'hi2'];
-
+  if (existingCustomer.address === 'PENDING_ADDRESS') {
     if (!text || GREETINGS.includes(lowerText)) {
       await whatsapp.sendMessage(from, `Please share your pickup address to continue:`);
       return;
     }
-    session.tempDetails.address = text;
-    session.state = STATES.REG_AWAIT_LOCATION;
-    await whatsapp.sendMessage(from, `Got it! Address saved.\n\nPlease share your location pin (tap 📎 → Location or send Google Maps link).`);
+
+    // Customer entered address -> Update DB & Send Main Menu!
+    await prisma.customer.update({
+      where: { phone: from },
+      data: { address: text }
+    });
+
+    await whatsapp.sendMessage(from, `Awesome! 🎉 Your profile has been created successfully!\n\n📍 Address: ${text}`);
+    await sendMainMenu(from, existingCustomer.name);
     return;
   }
+}
 
   if (session.state === STATES.REG_AWAIT_LOCATION) {
     let lat = null;

@@ -34,6 +34,14 @@ app.get('/uploads/price_list.pdf', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: 'Ironing Service Bot API is active and running!',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/uploads', express.static(uploadsDir));
 
 // SSE setup

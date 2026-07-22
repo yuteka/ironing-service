@@ -1,0 +1,162 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  phone     String   @id
+  name      String
+  address   String
+  latitude  Float?
+  longitude Float?
+  landmark  String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Partner {
+  id                                        Int     @id @default(autoincrement())
+  name                                      String
+  phone                                     String
+  username                                  String  @unique
+  password                                  String
+  active                                    Boolean @default(true)
+  isAvailable                               Boolean @default(true)
+  Order_Order_deliveredByPartnerIdToPartner Order[] @relation("Order_deliveredByPartnerIdToPartner")
+  orders                                    Order[]
+  Order_Order_pickedByPartnerIdToPartner    Order[] @relation("Order_pickedByPartnerIdToPartner")
+}
+
+model Order {
+  id                                          Int              @id @default(autoincrement())
+  customerPhone                               String
+  partnerId                                   Int?
+  paymentStatus                               String           @default("Pending")
+  paymentMethod                               String?
+  totalAmount                                 Float?
+  pickupDate                                  String
+  pickupSlot                                  String
+  customerNameSnapshot                        String?
+  pickupAddress                               String?
+  pickupLandmark                              String?
+  clothCheckStatus                            String?          @default("None")
+  clothCheckNote                              String?
+  clothPhotoUrl                               String?
+  partnerReleaseNote                          String?
+  reachedAt                                   DateTime?
+  pickedAt                                    DateTime?
+  createdAt                                   DateTime         @default(now())
+  updatedAt                                   DateTime         @updatedAt
+  deliveryOtp                                 String?
+  razorpayPaymentId                           String?
+  assignedDeliveryAt                          DateTime?
+  assignedPickupAt                            DateTime?
+  deliveredAt                                 DateTime?
+  deliveredByPartnerId                        Int?
+  invoiceUrl                                  String?
+  pickedByPartnerId                           Int?
+  readyAt                                     DateTime?
+  status                                      OrderStatus      @default(CONFIRMED)
+  customer                                    Customer         @relation(fields: [customerPhone], references: [phone])
+  Partner_Order_deliveredByPartnerIdToPartner Partner?         @relation("Order_deliveredByPartnerIdToPartner", fields: [deliveredByPartnerId], references: [id])
+  partner                                     Partner?         @relation(fields: [partnerId], references: [id])
+  Partner_Order_pickedByPartnerIdToPartner    Partner?         @relation("Order_pickedByPartnerIdToPartner", fields: [pickedByPartnerId], references: [id])
+  items                                       OrderItem[]
+  OrderStatusLog                              OrderStatusLog[]
+}
+
+model OrderItem {
+  id       Int    @id @default(autoincrement())
+  orderId  Int
+  itemType String
+  quantity Int
+  rate     Float
+  subtotal Float
+  note     String?
+  order    Order  @relation(fields: [orderId], references: [id])
+}
+
+model SupportTicket {
+  id            Int      @id @default(autoincrement())
+  customerPhone String
+  orderId       Int?
+  category      String
+  issue         String?
+  status        String   @default("Open")
+  createdAt     DateTime @default(now())
+}
+
+model WebhookLog {
+  id         Int      @id @default(autoincrement())
+  payload    String
+  source     String
+  receivedAt DateTime @default(now())
+  processed  Boolean  @default(false)
+}
+
+model PriceCatalog {
+  id       Int     @id @default(autoincrement())
+  itemName String  @unique
+  rate     Float
+  active   Boolean @default(true)
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  role      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model BusinessSettings {
+  id                    Int    @id @default(1)
+  businessName          String @default("Ironing Service")
+  businessAddress       String @default("123 Main St")
+  gstNumber             String @default("")
+  gstPercentage         Float  @default(5.0)
+  razorpayKeyId         String @default("")
+  razorpayKeySecret     String @default("")
+  razorpayWebhookSecret String @default("")
+  whatsappToken         String @default("")
+  whatsappPhoneId       String @default("")
+  supportPhone          String @default("")
+  supportEmail          String @default("")
+}
+
+model OrderStatusLog {
+  id        Int             @id @default(autoincrement())
+  orderId   Int
+  status    OrderStatus
+  changedBy StatusChangedBy
+  note      String?
+  changedAt DateTime        @default(now())
+  Order     Order           @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+enum OrderStatus {
+  CONFIRMED
+  PICKUP_ASSIGNED
+  COLLECTED
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  REASSIGNMENT_NEEDED
+  CANCELLED
+}
+
+enum StatusChangedBy {
+  SYSTEM
+  ADMIN
+  PARTNER
+  CUSTOMER
+}

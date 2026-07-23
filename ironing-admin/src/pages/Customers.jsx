@@ -1153,7 +1153,9 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
 
               {/* Gmail */}
               <a 
-                href={`mailto:?subject=${encodeURIComponent(shareModalData.subject)}&body=${encodeURIComponent(shareModalData.emailBody)}`}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&tf=1&su=${encodeURIComponent(shareModalData.subject)}&body=${encodeURIComponent(shareModalData.emailBody)}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => setShareModalData(null)}
                 style={{
                   display: 'flex',

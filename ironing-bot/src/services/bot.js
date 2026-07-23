@@ -62,7 +62,7 @@ async function handleTextMessage(from, message) {
   // If customer types a reset greeting, clear state and show main menu
   if (textBody === 'hi' || textBody === 'hello' || textBody === 'hey' || textBody === 'start' || textBody === 'menu') {
     delete chatStates[from];
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
     await whatsapp.sendMessage(
       from, 
       `Hi ${customer.name} 👋 Welcome back to Ironing Service! We are so happy to serve you again. ❤️\n\n👔 Check out our service rates:\n📄 Price List PDF: ${backendUrl}/uploads/price_list.pdf`
@@ -343,7 +343,7 @@ async function handleRegistration(from, message, existingCustomer) {
 
     await whatsapp.sendMessage(from, `You're all set, ${finalCustomer.name}!`);
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
     await whatsapp.sendMessage(
       from,
       `👔 Check out our service rates:\n📄 Price List PDF: ${backendUrl}/uploads/price_list.pdf`

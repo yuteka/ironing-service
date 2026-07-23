@@ -326,7 +326,7 @@ router.post('/:id/count', async (req, res) => {
       );
     } catch (razorError) {
       console.warn('[Partner Jobs API] Razorpay link generation failed (falling back to mock checkout):', razorError.message || razorError);
-      const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+      const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
       paymentLinkUrl = `${backendUrl}/api/payment/mock-checkout/${order.id}`;
     }
 
@@ -394,7 +394,7 @@ router.post('/:id/cash-received', async (req, res) => {
     }
 
     // Send Thank You confirmation & Tax Invoice PDF upon successful payment
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
     await whatsapp.sendMessage(
       order.customerPhone,
       `Thank you so much for your payment! Your order will be processed shortly. We'll notify you once it is ready! ✨\n\n✨ Whenever you need us next, simply send a "hi"! We are always here to help you. 😊`
@@ -652,7 +652,7 @@ router.put('/:id/delivered', async (req, res) => {
     await pdfService.generateInvoicePDF(updated, invoicePath);
 
     // Dynamic backend url
-    const backendUrl = process.env.BACKEND_URL || `http://localhost:3000`;
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
     const invoiceUrl = `${backendUrl}/uploads/invoices/invoice_${order.id}.pdf`;
 
     await whatsapp.sendMessage(

@@ -41,7 +41,7 @@ async function getRazorpayClient() {
  */
 async function createPaymentLink(orderId, amount, customerPhone, customerName) {
   const { client, keyId, isMock } = await getRazorpayClient();
-  const backendUrl = (process.env.BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
 
   if (isMock || !client) {
     console.log(`[Razorpay Service] Operating in Mock mode for Order #${orderId}`);

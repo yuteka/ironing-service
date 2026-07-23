@@ -106,7 +106,7 @@ router.post('/webhook', async (req, res) => {
 
           console.log(`[Razorpay Webhook] Order #${orderId} marked as Paid. Transaction Reference: ${paymentLinkEntity.id}`);
 
-          const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
 
           // 1. Thank you & status message
           await whatsapp.sendMessage(

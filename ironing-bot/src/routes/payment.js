@@ -159,7 +159,7 @@ router.post('/mock-pay/:id', async (req, res) => {
 
     console.log(`[Razorpay Mock Pay] Order #${orderId} marked Paid via mock trigger.`);
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
 
     // 1. Thank you & status message
     await whatsapp.sendMessage(

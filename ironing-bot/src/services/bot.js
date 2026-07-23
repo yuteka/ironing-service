@@ -444,7 +444,7 @@ async function sendMainMenu(from, customerName) {
  * Show price catalog.
  */
 async function sendPriceList(from) {
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+  const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
   await whatsapp.sendMessage(from, `📄 View our complete Price List PDF:\n${backendUrl}/uploads/price_list.pdf`);
 }
 

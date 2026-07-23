@@ -423,7 +423,7 @@ export default function App() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://${window.location.hostname}:3000/api/auth/admin/login`, {
+      const res = await fetch(`${API_BASE}/auth/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)

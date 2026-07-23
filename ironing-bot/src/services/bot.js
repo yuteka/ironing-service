@@ -44,8 +44,13 @@ async function handleTextMessage(from, message) {
     where: { phone: from }
   });
 
-  // If customer doesn't exist OR has pending registration, initiate registration flow
-  if (!customer || customer.address === 'PENDING_ADDRESS') {
+  // If customer doesn't exist OR has pending registration steps, initiate registration flow
+  const isPendingReg = !customer || 
+                       customer.address === 'PENDING_ADDRESS' || 
+                       customer.landmark === 'PENDING_LOCATION' || 
+                       customer.landmark === 'PENDING_LANDMARK';
+
+  if (isPendingReg) {
     await handleRegistration(from, message, customer);
     return;
   }
@@ -237,13 +242,13 @@ async function handleRegistration(from, message, existingCustomer) {
   const lowerText = text.toLowerCase();
   const GREETINGS = ['hi', 'hello', 'hey', 'start', 'menu', 'hola', 'hy', 'hii', 'hiii', 'hi2'];
 
+  // Step 1: Ask for Name
   if (!existingCustomer) {
     if (!text || GREETINGS.includes(lowerText)) {
       await whatsapp.sendMessage(from, `Welcome to Ironing Service! 👋 Looks like you're new here.\n\nWhat's your name?`);
       return;
     }
 
-    // Customer entered name (e.g. Yuteka) -> Save to DB immediately!
     await prisma.customer.create({
       data: {
         phone: from,
@@ -256,20 +261,95 @@ async function handleRegistration(from, message, existingCustomer) {
     return;
   }
 
+  // Step 2: Ask for Address
   if (existingCustomer.address === 'PENDING_ADDRESS') {
     if (!text || GREETINGS.includes(lowerText)) {
       await whatsapp.sendMessage(from, `Please share your pickup address to continue:`);
       return;
     }
 
-    // Customer entered address -> Update DB & Send Main Menu!
     await prisma.customer.update({
       where: { phone: from },
-      data: { address: text }
+      data: { 
+        address: text,
+        landmark: 'PENDING_LOCATION'
+      }
     });
 
-    await whatsapp.sendMessage(from, `Awesome! 🎉 Your profile has been created successfully!\n\n📍 Address: ${text}`);
-    await sendMainMenu(from, existingCustomer.name);
+    await whatsapp.sendMessage(from, `Got it! Address saved.\n\nPlease share your location pin (tap 📎 → Location or send Google Maps link).`);
+    return;
+  }
+
+  // Step 3: Ask for Location Pin / Google Maps Link
+  if (existingCustomer.landmark === 'PENDING_LOCATION') {
+    let lat = null;
+    let lng = null;
+    let skip = false;
+
+    if (message.type === 'location' && message.location) {
+      lat = message.location.latitude;
+      lng = message.location.longitude;
+    } else if (text) {
+      if (lowerText === 'skip' || lowerText === 'none') {
+        skip = true;
+      } else if (text.includes('maps.google.com') || text.includes('goo.gl') || text.includes('maps.app.goo.gl')) {
+        const qMatch = text.match(/q=([0-9.-]+)%2C([0-9.-]+)/) || text.match(/q=([0-9.-]+),([0-9.-]+)/) || text.match(/@([0-9.-]+),([0-9.-]+)/);
+        if (qMatch) {
+          lat = parseFloat(qMatch[1]);
+          lng = parseFloat(qMatch[2]);
+        } else {
+          skip = true;
+        }
+      } else {
+        const coords = text.split(',');
+        if (coords.length === 2) {
+          lat = parseFloat(coords[0].trim());
+          lng = parseFloat(coords[1].trim());
+        }
+      }
+    }
+
+    if (!skip && (lat === null || lng === null || isNaN(lat) || isNaN(lng))) {
+      await whatsapp.sendMessage(from, 'Could not parse location coordinates. Please share your location pin (tap 📎 → Location) or reply with "skip" to bypass:');
+      return;
+    }
+
+    await prisma.customer.update({
+      where: { phone: from },
+      data: {
+        latitude: lat,
+        longitude: lng,
+        landmark: 'PENDING_LANDMARK'
+      }
+    });
+
+    await whatsapp.sendMessage(from, 'Please enter a nearby landmark (or type "skip" to bypass):');
+    return;
+  }
+
+  // Step 4: Ask for Landmark
+  if (existingCustomer.landmark === 'PENDING_LANDMARK') {
+    if (!text) {
+      await whatsapp.sendMessage(from, 'Please enter a landmark or type "skip" to bypass:');
+      return;
+    }
+
+    const landmarkVal = (lowerText === 'none' || lowerText === 'skip') ? '' : text;
+
+    const finalCustomer = await prisma.customer.update({
+      where: { phone: from },
+      data: { landmark: landmarkVal }
+    });
+
+    await whatsapp.sendMessage(from, `You're all set, ${finalCustomer.name}!`);
+
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    await whatsapp.sendMessage(
+      from,
+      `👔 Check out our service rates:\n📄 Price List PDF: ${backendUrl}/uploads/price_list.pdf`
+    );
+
+    await sendMainMenu(from, finalCustomer.name);
     return;
   }
 }

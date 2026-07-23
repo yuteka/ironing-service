@@ -110,17 +110,22 @@ export default function App() {
       } else {
         if (res.ok) {
           const data = await res.json();
-          const mapped = data.map(item => ({
-            itemType: item.itemName,
-            rate: item.rate
-          }));
-          setCatalog(mapped);
+          if (data && data.length > 0) {
+            const mapped = data.map(item => ({
+              itemType: item.itemName,
+              rate: item.rate
+            }));
+            setCatalog(mapped);
+          } else {
+            setCatalog(MOCK_CATALOG);
+          }
         } else if (res.status === 401 || res.status === 403) {
           handleLogout();
         }
       }
     } catch (e) {
       console.error('[Partner Catalog Fetch] Error:', e);
+      setCatalog(MOCK_CATALOG);
     }
   };
 

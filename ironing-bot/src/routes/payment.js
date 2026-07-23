@@ -148,6 +148,12 @@ router.post('/mock-pay/:id', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    // If order is already paid, do not re-send WhatsApp messages or re-process
+    if (order.paymentStatus === 'Paid') {
+      console.log(`[Razorpay Mock Pay] Order #${orderId} is already marked Paid. Skipping duplicate WhatsApp message.`);
+      return res.json({ success: true, message: 'Order already paid', order });
+    }
+
     const mockPayId = `pay_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
@@ -205,6 +211,58 @@ router.get('/mock-checkout/:id', async (req, res) => {
       include: { customer: true }
     });
     if (!order) return res.send('Order not found');
+
+    // If order is already paid, show Payment Already Completed card directly!
+    if (order.paymentStatus === 'Paid') {
+      const invHash = generateOrderHash(id, 'invoice');
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <title>Payment Completed - Ironing Service</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+            body { background: #e2e8f0; margin: 0; padding: 16px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+            .card { background: #ffffff; border-radius: 20px; padding: 36px 24px; width: 100%; max-width: 410px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.12); border: 1px solid #cbd5e1; }
+            .badge-check { width: 64px; height: 64px; background: #dcfce7; color: #166534; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; margin: 0 auto 16px auto; }
+            .title { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; }
+            .sub { color: #64748b; font-size: 0.88rem; margin: 0 0 24px 0; }
+            .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: left; }
+            .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+            .info-row:last-child { margin-bottom: 0; }
+            .btn-inv { display: block; width: 100%; background: #0284c7; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="badge-check">✓</div>
+            <div class="title">Payment Completed</div>
+            <div class="sub">Booking #BK2026${String(id).padStart(4, '0')} has already been paid and processed.</div>
+
+            <div class="info-box">
+              <div class="info-row">
+                <span style="color:#64748b; font-weight:600;">Status:</span>
+                <span style="color:#166534; font-weight:800; background:#dcfce7; padding:2px 8px; border-radius:6px; font-size:0.75rem;">PAID</span>
+              </div>
+              <div class="info-row">
+                <span style="color:#64748b; font-weight:600;">Amount Paid:</span>
+                <span style="color:#0f172a; font-weight:900; font-size:1.1rem;">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
+              </div>
+              <div class="info-row">
+                <span style="color:#64748b; font-weight:600;">Payment Method:</span>
+                <span style="color:#0f172a; font-weight:700;">${order.paymentMethod || 'Razorpay Online'}</span>
+              </div>
+            </div>
+
+            <a href="/invoice/${invHash}" target="_blank" class="btn-inv">
+              📄 Download Tax Invoice (PDF)
+            </a>
+          </div>
+        </body>
+        </html>
+      `);
+    }
 
     const { client, keyId, isMock } = await razorpay.getRazorpayClient();
     const amountInPaise = Math.round((order.totalAmount || 0) * 100);

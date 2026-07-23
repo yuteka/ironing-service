@@ -381,28 +381,52 @@ router.get('/mock-checkout/:id', async (req, res) => {
           </div>
         </div>
 
+        <div id="processingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); flex-direction:column; align-items:center; justify-content:center; z-index:9999;">
+          <div style="width:48px; height:48px; border:4px solid #e2e8f0; border-top-color:#0284c7; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:16px;"></div>
+          <div id="processingText" style="font-size:1.1rem; font-weight:800; color:#0f172a;">Processing Payment...</div>
+          <div style="font-size:0.85rem; color:#64748b; margin-top:6px;">Connecting securely to Razorpay</div>
+        </div>
+
+        <style>
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+
         <script>
           function payViaUPI(appName) {
-            if (confirm('Complete Payment of ₹${parseFloat(order.totalAmount || 0).toFixed(2)} using ' + appName + '?')) {
-              executePayment(appName);
-            }
+            executePayment(appName);
           }
 
           function submitUPIForm() {
             var vpa = document.getElementById('upiIdInput').value || 'success@razorpay';
-            if (confirm('Pay ₹${parseFloat(order.totalAmount || 0).toFixed(2)} using UPI ID: ' + vpa + '?')) {
-              executePayment('UPI ID (' + vpa + ')');
-            }
+            executePayment('UPI ID (' + vpa + ')');
           }
 
           function executePayment(methodName) {
+            var overlay = document.getElementById('processingOverlay');
+            var text = document.getElementById('processingText');
+            if (overlay && text) {
+              text.innerText = 'Processing Payment via ' + methodName + '...';
+              overlay.style.display = 'flex';
+            }
+
             fetch('/api/payment/mock-pay/${id}', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ paymentMethod: methodName })
             }).then(function() {
-              alert('Payment Successful via ' + methodName + '! Check your WhatsApp for receipt.');
-              window.location.reload();
+              document.body.innerHTML = \`
+                <div style="background:#ffffff; border-radius:20px; padding:40px 30px; text-align:center; max-width:400px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,0.1); border:1px solid #e2e8f0; margin:auto;">
+                  <div style="width:64px; height:64px; background:#dcfce7; color:#166534; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 16px auto;">✓</div>
+                  <h2 style="color:#0f172a; font-weight:900; margin:0 0 8px 0; font-size:1.4rem;">Payment Successful!</h2>
+                  <p style="color:#64748b; font-size:0.9rem; margin:0 0 20px 0;">Booking #BK2026${String(id).padStart(4, '0')} has been marked as <strong>Paid</strong> via \${methodName}.</p>
+                  <div style="background:#f8fafc; border-radius:12px; padding:12px; font-size:0.85rem; color:#334155; margin-bottom:20px;">
+                    ✨ A WhatsApp confirmation with your Tax Invoice PDF has been sent to your phone!
+                  </div>
+                  <button onclick="window.close()" style="background:#0f172a; color:white; border:none; padding:12px 24px; border-radius:10px; font-weight:700; cursor:pointer; width:100%;">Close Window</button>
+                </div>
+              \`;
+            }).catch(function(err) {
+              if (overlay) overlay.style.display = 'none';
             });
           }
         </script>

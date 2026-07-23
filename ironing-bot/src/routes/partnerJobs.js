@@ -395,17 +395,11 @@ router.post('/:id/cash-received', async (req, res) => {
       global.emitSSE('orders_updated', { message: `Order #${id} payment received` });
     }
 
-    // Send Thank You confirmation & Tax Invoice PDF upon successful payment
-    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
+    // Send Thank You confirmation upon successful payment
     await whatsapp.sendMessage(
       order.customerPhone,
       `Thank you so much for your payment! Your order will be processed shortly. We'll notify you once it is ready! ✨\n\n✨ Whenever you need us next, simply send a "hi"! We are always here to help you. 😊`
     ).catch(e => console.error('[CashReceived] WhatsApp Notify Error:', e));
-
-    await whatsapp.sendMessage(
-      order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
-    ).catch(e => console.error('[CashReceived] WhatsApp Invoice Notify Error:', e));
 
     return res.json(updated);
   } catch (error) {

@@ -114,12 +114,6 @@ router.post('/webhook', async (req, res) => {
             order.customerPhone,
             `Thank you so much for your payment! Your order will be processed shortly. We'll notify you once it is ready! ✨\n\n✨ Whenever you need us next, simply send a "hi"! We are always here to help you. 😊`
           );
-
-          // 2. Tax Invoice PDF link message sent after payment confirmation
-          await whatsapp.sendMessage(
-            order.customerPhone,
-            `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
-          );
         } catch (error) {
           console.error('[Razorpay Webhook Error] Failed to update order status:', error);
         }
@@ -166,18 +160,10 @@ router.post('/mock-pay/:id', async (req, res) => {
 
     console.log(`[Razorpay Mock Pay] Order #${orderId} marked Paid via mock trigger.`);
 
-    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
-
     // 1. Thank you & status message
     await whatsapp.sendMessage(
       order.customerPhone,
       `Thank you so much for your payment! Your order will be processed shortly. We'll notify you once it is ready! ✨\n\n✨ Whenever you need us next, simply send a "hi"! We are always here to help you. 😊`
-    );
-
-    // 2. Tax Invoice PDF link message sent after payment confirmation
-    await whatsapp.sendMessage(
-      order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
     );
 
     // If it's a browser submit form POST, redirect them to success

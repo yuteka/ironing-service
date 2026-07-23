@@ -1010,32 +1010,41 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
 
               {/* Action Buttons: Download & Share Tax Invoice */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {selectedPaymentOrder.paymentStatus === 'Paid' && (
-                  <button
-                    className="btn btn-primary"
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem' }}
-                    onClick={() => {
-                      window.open(`http://${window.location.hostname}:3000/api/orders/${selectedPaymentOrder.id}/invoice`, '_blank');
-                    }}
-                  >
-                    <Download size={16} /> Download Tax Invoice (PDF)
-                  </button>
-                )}
-
                 {/* Share Tax Invoice Button */}
-                <button 
-                  onClick={() => setShareModalData({
-                    type: 'invoice',
-                    order: selectedPaymentOrder,
-                    url: `http://${window.location.hostname}:3000/api/orders/${selectedPaymentOrder.id}/invoice`,
-                    text: `Hi ${selectedPaymentOrder.customerNameSnapshot || selectedCust?.name || 'Customer'}, here is your Tax Invoice PDF for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}:\nhttp://${window.location.hostname}:3000/api/orders/${selectedPaymentOrder.id}/invoice`,
-                    subject: `Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
-                    emailBody: `Hi ${selectedPaymentOrder.customerNameSnapshot || selectedCust?.name || 'Customer'},\n\nPlease find your Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} at the link below:\nhttp://${window.location.hostname}:3000/api/orders/${selectedPaymentOrder.id}/invoice\n\nThank you,\nIroning Service`
-                  })}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#10B981', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
-                >
-                  <Share2 size={16} /> Share Tax Invoice
-                </button>
+                {(() => {
+                  const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                  const invoiceUrl = `${currentApiBase}/orders/${selectedPaymentOrder.id}/invoice`;
+                  const custName = selectedPaymentOrder.customerNameSnapshot || selectedCust?.name || 'Customer';
+                  return (
+                    <>
+                      {selectedPaymentOrder.paymentStatus === 'Paid' && (
+                        <button
+                          className="btn btn-primary"
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', marginBottom: 10 }}
+                          onClick={() => {
+                            window.open(invoiceUrl, '_blank');
+                          }}
+                        >
+                          <Download size={16} /> Download Tax Invoice (PDF)
+                        </button>
+                      )}
+
+                      <button 
+                        onClick={() => setShareModalData({
+                          type: 'invoice',
+                          order: selectedPaymentOrder,
+                          url: invoiceUrl,
+                          text: `Hi ${custName}, here is your Tax Invoice PDF for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}:\n${invoiceUrl}`,
+                          subject: `Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
+                          emailBody: `Hi ${custName},\n\nPlease find your Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} at the link below:\n${invoiceUrl}\n\nThank you,\nIroning Service`
+                        })}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#10B981', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
+                      >
+                        <Share2 size={16} /> Share Tax Invoice
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

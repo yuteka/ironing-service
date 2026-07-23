@@ -97,6 +97,13 @@ app.get('/pay/:id', (req, res, next) => {
   return paymentRoutes(req, res, next);
 });
 
+// Clean corporate tax invoice PDF URL (e.g. https://ironing-service.onrender.com/invoice/117)
+app.get('/invoice/:id', (req, res, next) => {
+  const cleanId = (req.params.id || '').replace(/\D/g, '');
+  req.url = `/${cleanId}/invoice`;
+  return orderRoutes(req, res, next);
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });

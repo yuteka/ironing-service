@@ -402,7 +402,7 @@ router.post('/:id/cash-received', async (req, res) => {
 
     await whatsapp.sendMessage(
       order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/api/orders/${order.id}/invoice`
+      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
     ).catch(e => console.error('[CashReceived] WhatsApp Invoice Notify Error:', e));
 
     return res.json(updated);

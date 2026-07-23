@@ -117,7 +117,7 @@ router.post('/webhook', async (req, res) => {
           // 2. Tax Invoice PDF link message sent after payment confirmation
           await whatsapp.sendMessage(
             order.customerPhone,
-            `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/api/orders/${order.id}/invoice`
+            `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
           );
         } catch (error) {
           console.error('[Razorpay Webhook Error] Failed to update order status:', error);
@@ -170,7 +170,7 @@ router.post('/mock-pay/:id', async (req, res) => {
     // 2. Tax Invoice PDF link message sent after payment confirmation
     await whatsapp.sendMessage(
       order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/api/orders/${order.id}/invoice`
+      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
     );
 
     // If it's a browser submit form POST, redirect them to success

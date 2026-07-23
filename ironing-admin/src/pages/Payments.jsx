@@ -761,7 +761,7 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                   {/* Share Tax Invoice Button */}
                   {(() => {
                     const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
-                    const invoiceUrl = `${currentApiBase}/orders/${selectedPaymentOrder.id}/invoice`;
+                    const invoiceUrl = `${currentApiBase.replace(/\/api$/, '')}/invoice/${selectedPaymentOrder.id}`;
                     return (
                       <>
                         {selectedPaymentOrder.paymentStatus === 'Paid' && (

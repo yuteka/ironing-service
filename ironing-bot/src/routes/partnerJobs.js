@@ -327,7 +327,7 @@ router.post('/:id/count', async (req, res) => {
     } catch (razorError) {
       console.warn('[Partner Jobs API] Razorpay link generation failed (falling back to mock checkout):', razorError.message || razorError);
       const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
-      paymentLinkUrl = `${backendUrl}/api/payment/mock-checkout/${order.id}`;
+      paymentLinkUrl = `${backendUrl}/pay/${order.id}`;
     }
 
     // Save total amount, notes, and verify status back to order record

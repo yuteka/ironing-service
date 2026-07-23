@@ -90,6 +90,13 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/payments', paymentsRoutes);
 
+// Clean corporate payment checkout URL (e.g. https://ironing-service.onrender.com/pay/114)
+app.get('/pay/:id', (req, res, next) => {
+  const cleanId = (req.params.id || '').replace(/\D/g, '');
+  req.url = `/mock-checkout/${cleanId}`;
+  return paymentRoutes(req, res, next);
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });

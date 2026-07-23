@@ -45,7 +45,7 @@ async function createPaymentLink(orderId, amount, customerPhone, customerName) {
 
   if (isMock || !client) {
     console.log(`[Razorpay Service] Operating in Mock mode for Order #${orderId}`);
-    return `${backendUrl}/api/payment/mock-checkout/${orderId}`;
+    return `${backendUrl}/pay/${orderId}`;
   }
 
   // Standardize Indian phone number format for Razorpay
@@ -74,7 +74,7 @@ async function createPaymentLink(orderId, amount, customerPhone, customerName) {
   } catch (error) {
     console.error('[Razorpay API Error] Payment link creation failed:', error.response ? error.response.data : error.message);
     // Fallback to local mock checkout if Razorpay API fails (e.g. invalid test key credentials)
-    return `${backendUrl}/api/payment/mock-checkout/${orderId}`;
+    return `${backendUrl}/pay/${orderId}`;
   }
 }
 

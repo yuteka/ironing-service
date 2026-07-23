@@ -958,7 +958,7 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
                   
                   {(() => {
                     const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
-                    const realRzpLink = selectedPaymentOrder.paymentLink || selectedPaymentOrder.razorpayPaymentLink || `${currentApiBase}/payment/mock-checkout/${selectedPaymentOrder.id}`;
+                    const realRzpLink = selectedPaymentOrder.paymentLink || selectedPaymentOrder.razorpayPaymentLink || `${currentApiBase.replace(/\/api$/, '')}/pay/${selectedPaymentOrder.id}`;
                     return (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: 8, padding: '6px 10px', marginBottom: 12 }}>

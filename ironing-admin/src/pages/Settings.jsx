@@ -298,8 +298,22 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
 
   const handleAddAdmin = async (e) => {
     e.preventDefault();
+
+    const existingSuperAdmin = admins.some(a => a.role === 'SUPER_ADMIN');
+    const existingSubAdmin = admins.some(a => a.role === 'SUB_ADMIN');
+
+    if (newAdminForm.role === 'SUPER_ADMIN' && existingSuperAdmin) {
+      triggerToast('A Super Admin account already exists. Please delete the current Super Admin to add a new one.', 'error');
+      return;
+    }
+
+    if (newAdminForm.role === 'SUB_ADMIN' && existingSubAdmin) {
+      triggerToast('A Sub Admin account already exists. Please delete the current Sub Admin to add a new one.', 'error');
+      return;
+    }
+
     if (isMockMode) {
-      triggerToast('Mock Mode: simulated new sub-admin registration.', 'info');
+      triggerToast('Mock Mode: simulated new admin registration.', 'info');
       return;
     }
     
@@ -874,65 +888,87 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-            <form onSubmit={handleAddAdmin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Full Name <span style={{ color: '#EF4444' }}>*</span></label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="e.g. Ramesh K"
-                  value={newAdminForm.name}
-                  onChange={e => setNewAdminForm({ ...newAdminForm, name: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
-                  pattern="[A-Za-z\s]+"
-                  title="Name must contain letters and spaces only."
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Username <span style={{ color: '#EF4444' }}>*</span></label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="e.g. ramesh123"
-                  value={newAdminForm.username}
-                  onChange={e => setNewAdminForm({ ...newAdminForm, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') })}
-                  pattern="[a-zA-Z0-9_]+"
-                  title="Username must contain letters, numbers and underscores only (no spaces)."
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Password <span style={{ color: '#EF4444' }}>*</span></label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  placeholder="Min 6 chars"
-                  value={newAdminForm.password}
-                  onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
-                  minLength="6"
-                  title="Password must be at least 6 characters."
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Role Category <span style={{ color: '#EF4444' }}>*</span></label>
-                <select 
-                  className="form-input"
-                  value={newAdminForm.role}
-                  onChange={e => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
-                >
-                  <option value="SUB_ADMIN">Sub Admin (Manager)</option>
-                  <option value="SUPER_ADMIN">Super Admin (Owner)</option>
-                </select>
-              </div>
+            {(() => {
+              const hasSuperAdmin = admins.some(a => a.role === 'SUPER_ADMIN');
+              const hasSubAdmin = admins.some(a => a.role === 'SUB_ADMIN');
 
-              <div style={{ marginTop: 24 }}>
-                <button className="btn btn-primary" style={{ width: '100%', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} type="submit" disabled={loading}>
-                  <UserPlus size={16} />
-                  Register Account
-                </button>
-              </div>
-            </form>
+              return (
+                <form onSubmit={handleAddAdmin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  {hasSuperAdmin && hasSubAdmin && (
+                    <div style={{ backgroundColor: '#FFFBEB', color: '#B45309', padding: '12px 14px', borderRadius: 8, fontSize: '0.8rem', border: '1px solid #FEF3C7', fontWeight: 600, lineHeight: 1.5 }}>
+                      ⚠️ <strong>Slots Full:</strong> The system allows exactly 1 Super Admin and 1 Sub Admin. To add a new admin, delete the existing account first.
+                    </div>
+                  )}
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Full Name <span style={{ color: '#EF4444' }}>*</span></label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="e.g. Ramesh K"
+                      value={newAdminForm.name}
+                      onChange={e => setNewAdminForm({ ...newAdminForm, name: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
+                      pattern="[A-Za-z\s]+"
+                      title="Name must contain letters and spaces only."
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Username <span style={{ color: '#EF4444' }}>*</span></label>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      placeholder="e.g. ramesh123"
+                      value={newAdminForm.username}
+                      onChange={e => setNewAdminForm({ ...newAdminForm, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') })}
+                      pattern="[a-zA-Z0-9_]+"
+                      title="Username must contain letters, numbers and underscores only (no spaces)."
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Password <span style={{ color: '#EF4444' }}>*</span></label>
+                    <input 
+                      type="password" 
+                      className="form-input" 
+                      placeholder="Min 6 chars"
+                      value={newAdminForm.password}
+                      onChange={e => setNewAdminForm({ ...newAdminForm, password: e.target.value })}
+                      minLength="6"
+                      title="Password must be at least 6 characters."
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Role Category <span style={{ color: '#EF4444' }}>*</span></label>
+                    <select 
+                      className="form-input"
+                      value={newAdminForm.role}
+                      onChange={e => setNewAdminForm({ ...newAdminForm, role: e.target.value })}
+                    >
+                      <option value="SUB_ADMIN" disabled={hasSubAdmin}>
+                        Sub Admin (Manager) {hasSubAdmin ? '(Slot Full - 1/1)' : '(Available)'}
+                      </option>
+                      <option value="SUPER_ADMIN" disabled={hasSuperAdmin}>
+                        Super Admin (Owner) {hasSuperAdmin ? '(Slot Full - 1/1)' : '(Available)'}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div style={{ marginTop: 24 }}>
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ width: '100%', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} 
+                      type="submit" 
+                      disabled={loading || (hasSuperAdmin && hasSubAdmin)}
+                    >
+                      <UserPlus size={16} />
+                      Register Account
+                    </button>
+                  </div>
+                </form>
+              );
+            })()}
           </div>
         </div>
       )}

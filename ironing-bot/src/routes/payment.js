@@ -301,7 +301,7 @@ router.get('/mock-checkout/:id', async (req, res) => {
         <script>
           var options = {
             "key": "${keyId || 'rzp_test_TGVvt5inYvcxJg'}",
-            "amount": "${amountInPaise || 23400}",
+            "amount": "${amountInPaise || 20000}",
             "currency": "INR",
             "name": "Ironing Service",
             "description": "Booking #BK2026${String(id).padStart(4, '0')}",
@@ -312,6 +312,36 @@ router.get('/mock-checkout/:id', async (req, res) => {
             },
             "theme": {
               "color": "#0284c7"
+            },
+            "method": {
+              "upi": true,
+              "card": true,
+              "netbanking": true,
+              "wallet": true
+            },
+            "config": {
+              "display": {
+                "sequence": ["block.upi", "block.other"],
+                "preferences": {
+                  "show_default_blocks": true
+                },
+                "blocks": {
+                  "upi": {
+                    "name": "Pay via UPI / GPay / PhonePe / Paytm",
+                    "instruments": [
+                      { "method": "upi" }
+                    ]
+                  },
+                  "other": {
+                    "name": "Cards, Netbanking & Wallets",
+                    "instruments": [
+                      { "method": "card" },
+                      { "method": "netbanking" },
+                      { "method": "wallet" }
+                    ]
+                  }
+                }
+              }
             },
             "handler": function (response) {
               fetch('/api/payment/mock-pay/${id}', {

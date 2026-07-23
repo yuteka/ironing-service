@@ -16,7 +16,10 @@ import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import OrderDrawer from './components/OrderDrawer';
 
-const API_BASE = `http://${window.location.hostname}:3000/api`;
+const API_BASE = import.meta.env.VITE_API_BASE || 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? `http://${window.location.hostname}:3000/api`
+    : 'https://ironing-service.onrender.com/api');
 
 // --- MOCK DATA FOR RUNNING WITHOUT BACKEND CONNECTED ---
 const MOCK_METRICS = {

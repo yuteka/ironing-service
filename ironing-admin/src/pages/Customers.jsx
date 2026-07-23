@@ -249,8 +249,9 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
 
   const handleSendInvoice = async (orderId) => {
     setSendingInvoice(true);
+    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
     try {
-      const res = await fetch(`http://${window.location.hostname}:3000/api/orders/${orderId}/send-invoice`, {
+      const res = await fetch(`${currentApiBase}/orders/${orderId}/send-invoice`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` }
       });

@@ -185,7 +185,8 @@ export default function App() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const healthRes = await fetch(`http://${window.location.hostname}:3000/health`).catch(() => null);
+      const healthUrl = API_BASE.replace(/\/api$/, '') + '/health';
+      const healthRes = await fetch(healthUrl).catch(() => null);
       if (!healthRes) {
         console.warn('Backend server unreachable. Enabling client-side Mock Mode.');
         setIsMockMode(true);

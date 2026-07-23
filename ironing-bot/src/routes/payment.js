@@ -226,202 +226,184 @@ router.get('/mock-checkout/:id', async (req, res) => {
       <!DOCTYPE html>
       <html lang="en">
       <head>
-        <title>Razorpay Payment - Booking #BK2026${String(id).padStart(4, '0')}</title>
+        <title>Razorpay Checkout - Ironing Service</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <style>
           * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
           body {
-            background: #f1f5f9;
+            background: #e2e8f0;
             margin: 0;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
           }
-          .checkout-container {
+          .rzp-container {
             background: #ffffff;
-            border-radius: 20px;
+            border-radius: 16px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.15);
+            max-width: 410px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
           }
-          .header {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+          .rzp-header {
+            background: #0284c7;
             color: white;
-            padding: 24px 20px;
-            text-align: center;
-          }
-          .header h2 { margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; }
-          .header p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
-          .amount-banner {
-            background: #f8fafc;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-          }
-          .amount-label { font-size: 0.85rem; color: #64748b; font-weight: 600; }
-          .amount-value { font-size: 1.6rem; font-weight: 900; color: #0284c7; }
-          
-          .section-title {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 16px 20px 8px 20px;
-          }
-          
-          .option-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin: 0 20px 12px 20px;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            padding: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
           }
-          .option-card:hover { border-color: #0284c7; background: #f0f9ff; }
-          .option-left { display: flex; alignItems: center; gap: 12px; }
-          .option-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
-          .icon-upi { background: #dcfce7; color: #166534; }
-          .icon-card { background: #e0f2fe; color: #0369a1; }
-          .icon-nb { background: #fef3c7; color: #92400e; }
-          .option-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; }
-          .option-desc { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-          
-          .btn-pay-action {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 16px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+          .rzp-header-left { display: flex; align-items: center; gap: 12px; }
+          .rzp-logo {
+            width: 38px; height: 38px; background: rgba(255,255,255,0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.1rem;
+          }
+          .rzp-title { font-size: 1.05rem; font-weight: 700; }
+          .rzp-badge { font-size: 0.68rem; background: rgba(255,255,255,0.25); padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-top: 2px; display: inline-block; }
+
+          .rzp-body { padding: 16px; }
+
+          .section-label { font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+
+          .offer-banner {
+            background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px;
+            padding: 8px 12px; font-size: 0.75rem; color: #334155; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
           }
 
-          .footer-note {
-            text-align: center;
-            padding: 16px 20px;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            border-top: 1px solid #f1f5f9;
+          .upi-apps-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;
           }
+          .upi-app-btn {
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px;
+            padding: 12px 10px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: all 0.15s ease; text-align: left;
+          }
+          .upi-app-btn:hover { border-color: #0284c7; background: #f0f9ff; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15); }
+          .upi-app-icon { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+          .upi-app-name { font-size: 0.82rem; font-weight: 700; color: #1e293b; }
+
+          .input-label { font-size: 0.78rem; font-weight: 700; color: #64748b; margin-bottom: 6px; display: block; }
+          .upi-input-box {
+            width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px;
+            font-size: 0.9rem; margin-bottom: 16px; outline: none; transition: border-color 0.2s;
+          }
+          .upi-input-box:focus { border-color: #0284c7; }
+
+          .other-options-title { font-size: 0.8rem; font-weight: 700; color: #64748b; margin: 18px 0 8px 0; }
+          .other-opt-row {
+            border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px; cursor: pointer; background: #fafafa;
+          }
+          .other-opt-row:hover { background: #f1f5f9; }
+          .other-opt-text { font-size: 0.85rem; font-weight: 700; color: #334155; }
+
+          .rzp-footer {
+            background: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+          }
+          .amount-disp { font-size: 1.2rem; font-weight: 900; color: #0f172a; }
+          .btn-continue {
+            background: #0f172a; color: white; border: none; padding: 12px 28px;
+            border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); transition: background 0.2s;
+          }
+          .btn-continue:hover { background: #0284c7; }
         </style>
       </head>
       <body>
-        <div class="checkout-container">
-          <div class="header">
-            <h2>Ironing Service</h2>
-            <p>Booking #BK2026${String(id).padStart(4, '0')} • ${order.customer?.name || 'Customer'}</p>
-          </div>
-
-          <div class="amount-banner">
-            <span class="amount-label">Total Payable Amount</span>
-            <span class="amount-value">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
-          </div>
-
-          <div class="section-title">Select Payment Method (Test Mode)</div>
-
-          <!-- OPTION 1: UPI / GPay / PhonePe / Paytm -->
-          <div class="option-card" onclick="processPayment('UPI (GPay / PhonePe / Paytm)')">
-            <div class="option-left">
-              <div class="option-icon icon-upi">📱</div>
+        <div class="rzp-container">
+          <div class="rzp-header">
+            <div class="rzp-header-left">
+              <div class="rzp-logo">I</div>
               <div>
-                <div class="option-title">UPI / GPay / PhonePe / Paytm</div>
-                <div class="option-desc">Google Pay, PhonePe, Paytm, BHIM UPI</div>
+                <div class="rzp-title">Ironing Service</div>
+                <div class="rzp-badge">🛡️ Razorpay Trusted Business</div>
               </div>
             </div>
-            <button class="btn-pay-action">Pay Now</button>
           </div>
 
-          <!-- OPTION 2: Credit / Debit Cards -->
-          <div class="option-card" onclick="processPayment('Credit / Debit Card (Visa/Mastercard)')">
-            <div class="option-left">
-              <div class="option-icon icon-card">💳</div>
-              <div>
-                <div class="option-title">Credit & Debit Cards</div>
-                <div class="option-desc">Visa, Mastercard, RuPay Cards</div>
+          <div class="rzp-body">
+            <div class="section-label">UPI</div>
+
+            <div class="offer-banner">
+              <span>🎟️</span>
+              <span>UPTO ₹200 Cashback on CRED / GPay</span>
+            </div>
+
+            <!-- UPI Apps Section -->
+            <label class="input-label">UPI Apps</label>
+            <div class="upi-apps-grid">
+              <div class="upi-app-btn" onclick="payViaUPI('Google Pay')">
+                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" />
+                <span class="upi-app-name">Google Pay</span>
+              </div>
+              <div class="upi-app-btn" onclick="payViaUPI('PhonePe')">
+                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" />
+                <span class="upi-app-name">PhonePe</span>
+              </div>
+              <div class="upi-app-btn" onclick="payViaUPI('Paytm')">
+                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo.jpg" alt="Paytm" />
+                <span class="upi-app-name">PayTM</span>
+              </div>
+              <div class="upi-app-btn" onclick="payViaUPI('BHIM UPI')">
+                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/60/BHIM_logo.svg" alt="BHIM" />
+                <span class="upi-app-name">BHIM UPI</span>
               </div>
             </div>
-            <button class="btn-pay-action">Pay Now</button>
-          </div>
 
-          <!-- OPTION 3: NetBanking -->
-          <div class="option-card" onclick="processPayment('NetBanking (Baroda/Canara/SBI/HDFC)')">
-            <div class="option-left">
-              <div class="option-icon icon-nb">🏦</div>
-              <div>
-                <div class="option-title">NetBanking & Wallets</div>
-                <div class="option-desc">All Major Indian Banks & E-Wallets</div>
-              </div>
+            <!-- UPI ID / Number Input -->
+            <label class="input-label">UPI ID / Number</label>
+            <input type="text" id="upiIdInput" class="upi-input-box" value="yuteka@okicicibank" placeholder="example@okicicibank" />
+
+            <div class="other-options-title">More Payment Options</div>
+            <div class="other-opt-row" onclick="payViaUPI('Credit/Debit Card')">
+              <span class="other-opt-text">💳 Cards (Visa, Mastercard, RuPay)</span>
+              <span>›</span>
             </div>
-            <button class="btn-pay-action">Pay Now</button>
+            <div class="other-opt-row" onclick="payViaUPI('NetBanking')">
+              <span class="other-opt-text">🏦 Netbanking (Baroda, SBI, HDFC)</span>
+              <span>›</span>
+            </div>
           </div>
 
-          <!-- OPTION 4: Official Razorpay Popup Launcher -->
-          <div style="margin: 16px 20px 20px 20px;">
-            <button id="rzp-button" style="width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-              Open Standard Razorpay Popup ➔
-            </button>
-          </div>
-
-          <div class="footer-note">
-            🔒 256-Bit SSL Encrypted • Powered by Razorpay Sandbox
+          <div class="rzp-footer">
+            <div>
+              <div style="font-size:0.68rem; color:#64748b; font-weight:600;">Booking #BK2026${String(id).padStart(4, '0')}</div>
+              <div class="amount-disp">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</div>
+            </div>
+            <button class="btn-continue" onclick="submitUPIForm()">Continue</button>
           </div>
         </div>
 
         <script>
-          function processPayment(method) {
-            if (confirm('Complete Test Payment of ₹${parseFloat(order.totalAmount || 0).toFixed(2)} via ' + method + '?')) {
-              fetch('/api/payment/mock-pay/${id}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentMethod: method })
-              }).then(function() {
-                alert('Payment Successful via ' + method + '! Check your WhatsApp for confirmation.');
-                window.location.reload();
-              });
+          function payViaUPI(appName) {
+            if (confirm('Complete Payment of ₹${parseFloat(order.totalAmount || 0).toFixed(2)} using ' + appName + '?')) {
+              executePayment(appName);
             }
           }
 
-          var options = {
-            "key": "${keyId || 'rzp_test_TGVvt5inYvcxJg'}",
-            "amount": "${amountInPaise || 20000}",
-            "currency": "INR",
-            "name": "Ironing Service",
-            "description": "Booking #BK2026${String(id).padStart(4, '0')}",
-            ${razorpayOrderId ? `"order_id": "${razorpayOrderId}",` : ''}
-            "prefill": {
-              "name": "${(order.customer?.name || '').replace(/"/g, '')}",
-              "contact": "${(order.customerPhone || '').replace(/\D/g, '')}"
-            },
-            "theme": { "color": "#0284c7" },
-            "handler": function (response) {
-              fetch('/api/payment/mock-pay/${id}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentMethod: 'Razorpay Official' })
-              }).then(function() {
-                alert('Payment Successful! Thank you.');
-                window.location.reload();
-              });
+          function submitUPIForm() {
+            var vpa = document.getElementById('upiIdInput').value || 'success@razorpay';
+            if (confirm('Pay ₹${parseFloat(order.totalAmount || 0).toFixed(2)} using UPI ID: ' + vpa + '?')) {
+              executePayment('UPI ID (' + vpa + ')');
             }
-          };
+          }
 
-          var rzp1 = new Razorpay(options);
-          document.getElementById('rzp-button').onclick = function(e){
-            rzp1.open();
-            e.preventDefault();
+          function executePayment(methodName) {
+            fetch('/api/payment/mock-pay/${id}', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentMethod: methodName })
+            }).then(function() {
+              alert('Payment Successful via ' + methodName + '! Check your WhatsApp for receipt.');
+              window.location.reload();
+            });
           }
         </script>
       </body>

@@ -340,19 +340,19 @@ router.get('/mock-checkout/:id', async (req, res) => {
             <label class="input-label">UPI Apps</label>
             <div class="upi-apps-grid">
               <div class="upi-app-btn" onclick="payViaUPI('Google Pay')">
-                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" />
+                <svg width="22" height="22" viewBox="0 0 24 24" style="flex-shrink:0;"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.15C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.99-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
                 <span class="upi-app-name">Google Pay</span>
               </div>
               <div class="upi-app-btn" onclick="payViaUPI('PhonePe')">
-                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" />
+                <div style="width:24px; height:24px; background:#5f259f; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:12px; flex-shrink:0;">पे</div>
                 <span class="upi-app-name">PhonePe</span>
               </div>
               <div class="upi-app-btn" onclick="payViaUPI('Paytm')">
-                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo.jpg" alt="Paytm" />
+                <div style="width:24px; height:24px; background:#002e6e; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#00baf2; font-weight:900; font-size:8px; flex-shrink:0;">Paytm</div>
                 <span class="upi-app-name">PayTM</span>
               </div>
               <div class="upi-app-btn" onclick="payViaUPI('BHIM UPI')">
-                <img class="upi-app-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/60/BHIM_logo.svg" alt="BHIM" />
+                <div style="width:24px; height:24px; background:linear-gradient(135deg, #ff9933, #ffffff, #138808); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#000080; font-weight:900; font-size:8px; border:1px solid #cbd5e1; flex-shrink:0;">BHIM</div>
                 <span class="upi-app-name">BHIM UPI</span>
               </div>
             </div>

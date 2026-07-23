@@ -582,216 +582,222 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
 
       </div>
 
-      {/* Payment Detail Modal / Drawer */}
-      {selectedPaymentOrder && (
-        <div className="drawer-overlay" onClick={() => setSelectedPaymentOrder(null)}>
-          <div className="drawer-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, overflowY: 'auto', padding: '24px 28px' }}>
-            <div className="drawer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 18px 0', borderBottom: '1px solid var(--border-light)' }}>
-              <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                  Payment Details
-                </h2>
-                <span className="notranslate" translate="no" style={{ fontSize: '0.78rem', color: selectedPaymentOrder.paymentStatus === 'Paid' ? '#7c3aed' : '#64748b', fontWeight: 800, fontFamily: 'monospace' }}>
-                  {selectedPaymentOrder.paymentStatus === 'Paid' ? fmtInvId(selectedPaymentOrder.id) : `Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} (Pending Payment)`}
-                </span>
-              </div>
-              <button 
-                onClick={() => setSelectedPaymentOrder(null)} 
-                style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', cursor: 'pointer', color: '#64748b', padding: 6, display: 'flex', alignItems: 'center' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
+      {selectedPaymentOrder && (() => {
+        const amt = Number(selectedPaymentOrder.totalAmount || 0);
+        const amtFormatted = amt.toFixed(2);
+        const baseAmtFormatted = (amt / (1 + (gstPercentage / 100))).toFixed(2);
+        const taxAmtFormatted = (amt - (amt / (1 + (gstPercentage / 100)))).toFixed(2);
+        const custName = selectedPaymentOrder.customerNameSnapshot || 'Customer';
 
-            <div className="drawer-body" style={{ padding: '20px 0 0 0' }}>
-              {/* Payment Summary Box */}
-              <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 14, padding: '18px 20px', marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Payment Status</span>
-                  <span style={{ 
-                    padding: '4px 12px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 800, 
-                    backgroundColor: selectedPaymentOrder.paymentStatus === 'Paid' ? '#ECFDF5' : '#FEF3C7', 
-                    color: selectedPaymentOrder.paymentStatus === 'Paid' ? '#059669' : '#D97706', 
-                    borderRadius: 6 
-                  }}>
-                    {selectedPaymentOrder.paymentStatus?.toUpperCase()}
+        return (
+          <div className="drawer-overlay" onClick={() => setSelectedPaymentOrder(null)}>
+            <div className="drawer-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, overflowY: 'auto', padding: '24px 28px' }}>
+              <div className="drawer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 18px 0', borderBottom: '1px solid var(--border-light)' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                    Payment Details
+                  </h2>
+                  <span className="notranslate" translate="no" style={{ fontSize: '0.78rem', color: selectedPaymentOrder.paymentStatus === 'Paid' ? '#7c3aed' : '#64748b', fontWeight: 800, fontFamily: 'monospace' }}>
+                    {selectedPaymentOrder.paymentStatus === 'Paid' ? fmtInvId(selectedPaymentOrder.id) : `Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} (Pending Payment)`}
                   </span>
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Amount Billed</span>
-                  <span style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0F172A' }}>
-                    ₹{selectedPaymentOrder.totalAmount?.toFixed(2)}
-                  </span>
-                </div>
+                <button 
+                  onClick={() => setSelectedPaymentOrder(null)} 
+                  style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', cursor: 'pointer', color: '#64748b', padding: 6, display: 'flex', alignItems: 'center' }}
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              {/* Transaction Meta Details */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Transaction Ref ID</span>
-                  <span className="notranslate" translate="no" style={{ fontSize: '0.82rem', fontWeight: 700, fontFamily: 'monospace', color: '#0F172A' }}>
-                    {selectedPaymentOrder.razorpayPaymentId || `pay_mock_${selectedPaymentOrder.id}`}
-                  </span>
+              <div className="drawer-body" style={{ padding: '20px 0 0 0' }}>
+                {/* Payment Summary Box */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 14, padding: '18px 20px', marginBottom: 24 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Payment Status</span>
+                    <span style={{ 
+                      padding: '4px 12px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 800, 
+                      backgroundColor: selectedPaymentOrder.paymentStatus === 'Paid' ? '#ECFDF5' : '#FEF3C7', 
+                      color: selectedPaymentOrder.paymentStatus === 'Paid' ? '#059669' : '#D97706', 
+                      borderRadius: 6 
+                    }}>
+                      {selectedPaymentOrder.paymentStatus?.toUpperCase() || 'PENDING'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Amount Billed</span>
+                    <span style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0F172A' }}>
+                      ₹{amtFormatted}
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Booking Ref</span>
-                  <span className="notranslate" translate="no" style={{ fontSize: '0.82rem', fontWeight: 700, fontFamily: 'monospace', color: '#0284c7' }}>
-                    {fmtBookingId(selectedPaymentOrder.id)}
-                  </span>
+                {/* Transaction Meta Details */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Transaction Ref ID</span>
+                    <span className="notranslate" translate="no" style={{ fontSize: '0.82rem', fontWeight: 700, fontFamily: 'monospace', color: '#0F172A' }}>
+                      {selectedPaymentOrder.razorpayPaymentId || `pay_mock_${selectedPaymentOrder.id}`}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Booking Ref</span>
+                    <span className="notranslate" translate="no" style={{ fontSize: '0.82rem', fontWeight: 700, fontFamily: 'monospace', color: '#0284c7' }}>
+                      {fmtBookingId(selectedPaymentOrder.id)}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Payment Method</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
+                      Razorpay Online (UPI / Card / NetBanking)
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Payment Date & Time</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
+                      {new Date(selectedPaymentOrder.updatedAt || selectedPaymentOrder.createdAt || Date.now()).toLocaleString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                      })}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Customer Name</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
+                      {custName}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Customer Phone</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
+                      {selectedPaymentOrder.customerPhone ? formatPhone(selectedPaymentOrder.customerPhone) : 'N/A'}
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Payment Method</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
-                    Razorpay Online (UPI / Card / NetBanking)
-                  </span>
-                </div>
+                {/* Payment Link & Sharing Box */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Razorpay Payment Checkout Link
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: '#0ea5e9', fontWeight: 700, background: '#e0f2fe', padding: '2px 8px', borderRadius: 10 }}>Active</span>
+                  </div>
+                  
+                  {(() => {
+                    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                    const realRzpLink = selectedPaymentOrder.paymentLink || selectedPaymentOrder.razorpayPaymentLink || `${currentApiBase}/payment/mock-checkout/${selectedPaymentOrder.id}`;
+                    return (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: 8, padding: '6px 10px', marginBottom: 12 }}>
+                          <span className="notranslate" translate="no" style={{ fontSize: '0.78rem', color: '#334155', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {realRzpLink}
+                          </span>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(realRzpLink);
+                              setCopiedId(`pay-${selectedPaymentOrder.id}`);
+                              setTimeout(() => setCopiedId(null), 2000);
+                            }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0284c7', padding: 2, display: 'flex', alignItems: 'center' }}
+                            title="Copy Payment Link"
+                          >
+                            {copiedId === `pay-${selectedPaymentOrder.id}` ? <Check size={16} style={{ color: '#16a34a' }} /> : <Copy size={16} />}
+                          </button>
+                        </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Payment Date & Time</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
-                    {new Date(selectedPaymentOrder.updatedAt || selectedPaymentOrder.createdAt).toLocaleString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true
-                    })}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Customer Name</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
-                    {selectedPaymentOrder.customerNameSnapshot || 'Unknown Customer'}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F1F5F9', paddingBottom: 10 }}>
-                  <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Customer Phone</span>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0F172A' }}>
-                    {selectedPaymentOrder.customerPhone ? formatPhone(selectedPaymentOrder.customerPhone) : 'N/A'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Payment Link & Sharing Box */}
-              <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Razorpay Payment Checkout Link
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: '#0ea5e9', fontWeight: 700, background: '#e0f2fe', padding: '2px 8px', borderRadius: 10 }}>Active</span>
-                </div>
-                
-                {(() => {
-                  const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
-                  const realRzpLink = selectedPaymentOrder.paymentLink || selectedPaymentOrder.razorpayPaymentLink || `${currentApiBase}/payment/mock-checkout/${selectedPaymentOrder.id}`;
-                  return (
-                    <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: 8, padding: '6px 10px', marginBottom: 12 }}>
-                        <span className="notranslate" translate="no" style={{ fontSize: '0.78rem', color: '#334155', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {realRzpLink}
-                        </span>
+                        {/* Share Payment Link Button */}
                         <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(realRzpLink);
-                            setCopiedId(`pay-${selectedPaymentOrder.id}`);
-                            setTimeout(() => setCopiedId(null), 2000);
-                          }}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0284c7', padding: 2, display: 'flex', alignItems: 'center' }}
-                          title="Copy Payment Link"
+                          onClick={() => setShareModalData({
+                            type: 'payment',
+                            order: selectedPaymentOrder,
+                            url: realRzpLink,
+                            text: `Hi ${custName}, here is your Razorpay payment link for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} (Total: ₹${amtFormatted}):\n${realRzpLink}`,
+                            subject: `Razorpay Payment Link for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
+                            emailBody: `Hi ${custName},\n\nPlease complete your payment of ₹${amtFormatted} using the Razorpay link below:\n${realRzpLink}\n\nThank you,\nIroning Service`
+                          })}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#0284c7', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)' }}
                         >
-                          {copiedId === `pay-${selectedPaymentOrder.id}` ? <Check size={16} style={{ color: '#16a34a' }} /> : <Copy size={16} />}
+                          <Share2 size={16} /> Share Payment Link
                         </button>
-                      </div>
+                      </>
+                    );
+                  })()}
+                </div>
 
-                      {/* Share Payment Link Button */}
-                      <button 
-                        onClick={() => setShareModalData({
-                          type: 'payment',
-                          order: selectedPaymentOrder,
-                          url: realRzpLink,
-                          text: `Hi ${selectedPaymentOrder.customerNameSnapshot || 'Customer'}, here is your Razorpay payment link for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} (Total: ₹${selectedPaymentOrder.totalAmount?.toFixed(2)}):\n${realRzpLink}`,
-                          subject: `Razorpay Payment Link for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
-                          emailBody: `Hi ${selectedPaymentOrder.customerNameSnapshot || 'Customer'},\n\nPlease complete your payment of ₹${selectedPaymentOrder.totalAmount?.toFixed(2)} using the Razorpay link below:\n${realRzpLink}\n\nThank you,\nIroning Service`
-                        })}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#0284c7', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.25)' }}
-                      >
-                        <Share2 size={16} /> Share Payment Link
-                      </button>
-                    </>
-                  );
-                })()}
-              </div>
+                {/* GST Tax Breakdown */}
+                <div style={{ backgroundColor: '#F1F5F9', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: 10, letterSpacing: '0.04em' }}>
+                    Tax & Computation Breakdown
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
+                    <span>Base Amount (Excl. Tax)</span>
+                    <span>₹{baseAmtFormatted}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
+                    <span>GST ({gstPercentage}%)</span>
+                    <span>₹{taxAmtFormatted}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.92rem', fontWeight: 800, borderTop: '1px solid #CBD5E1', paddingTop: 8, marginTop: 8, color: '#0F172A' }}>
+                    <span>Total Amount Billed</span>
+                    <span>₹{amtFormatted}</span>
+                  </div>
+                </div>
 
-              {/* GST Tax Breakdown */}
-              <div style={{ backgroundColor: '#F1F5F9', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: 10, letterSpacing: '0.04em' }}>
-                  Tax & Computation Breakdown
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
-                  <span>Base Amount (Excl. Tax)</span>
-                  <span>₹{(selectedPaymentOrder.totalAmount / (1 + (gstPercentage / 100))).toFixed(2)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
-                  <span>GST ({gstPercentage}%)</span>
-                  <span>₹{(selectedPaymentOrder.totalAmount - (selectedPaymentOrder.totalAmount / (1 + (gstPercentage / 100)))).toFixed(2)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.92rem', fontWeight: 800, borderTop: '1px solid #CBD5E1', paddingTop: 8, marginTop: 8, color: '#0F172A' }}>
-                  <span>Total Amount Billed</span>
-                  <span>₹{selectedPaymentOrder.totalAmount?.toFixed(2)}</span>
-                </div>
-              </div>
+                {/* Action Buttons: Download & Share Tax Invoice */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* Share Tax Invoice Button */}
+                  {(() => {
+                    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                    const invoiceUrl = `${currentApiBase}/orders/${selectedPaymentOrder.id}/invoice`;
+                    return (
+                      <>
+                        {selectedPaymentOrder.paymentStatus === 'Paid' && (
+                          <button
+                            className="btn btn-primary"
+                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', marginBottom: 10 }}
+                            onClick={() => {
+                              window.open(invoiceUrl, '_blank');
+                            }}
+                          >
+                            <Download size={16} /> Download Tax Invoice (PDF)
+                          </button>
+                        )}
 
-              {/* Action Buttons: Download & Share Tax Invoice */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* Share Tax Invoice Button */}
-                {(() => {
-                  const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
-                  const invoiceUrl = `${currentApiBase}/orders/${selectedPaymentOrder.id}/invoice`;
-                  const custName = selectedPaymentOrder.customerNameSnapshot || 'Customer';
-                  return (
-                    <>
-                      {selectedPaymentOrder.paymentStatus === 'Paid' && (
-                        <button
-                          className="btn btn-primary"
-                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', marginBottom: 10 }}
-                          onClick={() => {
-                            window.open(invoiceUrl, '_blank');
-                          }}
+                        <button 
+                          onClick={() => setShareModalData({
+                            type: 'invoice',
+                            order: selectedPaymentOrder,
+                            url: invoiceUrl,
+                            text: `Hi ${custName}, here is your Tax Invoice PDF for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}:\n${invoiceUrl}`,
+                            subject: `Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
+                            emailBody: `Hi ${custName},\n\nPlease find your Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} at the link below:\n${invoiceUrl}\n\nThank you,\nIroning Service`
+                          })}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#10B981', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
                         >
-                          <Download size={16} /> Download Tax Invoice (PDF)
+                          <Share2 size={16} /> Share Tax Invoice
                         </button>
-                      )}
-
-                      <button 
-                        onClick={() => setShareModalData({
-                          type: 'invoice',
-                          order: selectedPaymentOrder,
-                          url: invoiceUrl,
-                          text: `Hi ${custName}, here is your Tax Invoice PDF for Ironing Service Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}:\n${invoiceUrl}`,
-                          subject: `Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
-                          emailBody: `Hi ${custName},\n\nPlease find your Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} at the link below:\n${invoiceUrl}\n\nThank you,\nIroning Service`
-                        })}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#10B981', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
-                      >
-                        <Share2 size={16} /> Share Tax Invoice
-                      </button>
-                    </>
-                  );
-                })()}
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modern Compact Floating Popover Share Card Modal */}
       {shareModalData && (

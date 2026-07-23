@@ -853,6 +853,8 @@ export default function App() {
             loadAllData={loadAllData} 
             triggerToast={triggerToast}
             setConfirmModal={setConfirmModal}
+            setSelectedOrder={setSelectedOrder}
+            API_BASE={API_BASE}
           />
         )}
 

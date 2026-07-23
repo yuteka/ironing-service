@@ -6,6 +6,7 @@ const prisma = require('../services/db');
 const whatsapp = require('../services/whatsapp');
 const razorpay = require('../services/razorpay');
 const { authenticatePartner } = require('../middleware/auth');
+const { generateOrderHash } = require('../utils/securityToken');
 
 // Protect all routes with Partner JWT validation
 router.use(authenticatePartner);
@@ -327,7 +328,7 @@ router.post('/:id/count', async (req, res) => {
     } catch (razorError) {
       console.warn('[Partner Jobs API] Razorpay link generation failed (falling back to mock checkout):', razorError.message || razorError);
       const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
-      paymentLinkUrl = `${backendUrl}/pay/${order.id}`;
+      paymentLinkUrl = `${backendUrl}/pay/${generateOrderHash(order.id, 'pay')}`;
     }
 
     // Save total amount, notes, and verify status back to order record
@@ -372,7 +373,8 @@ router.post('/:id/cash-received', async (req, res) => {
 
   try {
     const order = await prisma.order.findFirst({
-      where: { id, partnerId }
+      where: { id, partnerId },
+      include: { customer: true }
     });
 
     if (!order) {
@@ -402,7 +404,7 @@ router.post('/:id/cash-received', async (req, res) => {
 
     await whatsapp.sendMessage(
       order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
+      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
     ).catch(e => console.error('[CashReceived] WhatsApp Invoice Notify Error:', e));
 
     return res.json(updated);

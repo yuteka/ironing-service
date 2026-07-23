@@ -39,13 +39,15 @@ async function getRazorpayClient() {
  * @param {string} customerName - Customer display name.
  * @returns {Promise<string>} The checkout link URL.
  */
+const { generateOrderHash } = require('../utils/securityToken');
+
 async function createPaymentLink(orderId, amount, customerPhone, customerName) {
   const { client, keyId, isMock } = await getRazorpayClient();
   const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
 
   if (isMock || !client) {
     console.log(`[Razorpay Service] Operating in Mock mode for Order #${orderId}`);
-    return `${backendUrl}/pay/${orderId}`;
+    return `${backendUrl}/pay/${generateOrderHash(orderId, 'pay')}`;
   }
 
   // Standardize Indian phone number format for Razorpay
@@ -74,7 +76,7 @@ async function createPaymentLink(orderId, amount, customerPhone, customerName) {
   } catch (error) {
     console.error('[Razorpay API Error] Payment link creation failed:', error.response ? error.response.data : error.message);
     // Fallback to local mock checkout if Razorpay API fails (e.g. invalid test key credentials)
-    return `${backendUrl}/pay/${orderId}`;
+    return `${backendUrl}/pay/${generateOrderHash(orderId, 'pay')}`;
   }
 }
 

@@ -5,6 +5,7 @@ const prisma = require('../services/db');
 const razorpay = require('../services/razorpay');
 const whatsapp = require('../services/whatsapp');
 const { authenticateJWT } = require('../middleware/auth');
+const { generateOrderHash } = require('../utils/securityToken');
 require('dotenv').config();
 
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'test_secret';
@@ -117,7 +118,7 @@ router.post('/webhook', async (req, res) => {
           // 2. Tax Invoice PDF link message sent after payment confirmation
           await whatsapp.sendMessage(
             order.customerPhone,
-            `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
+            `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
           );
         } catch (error) {
           console.error('[Razorpay Webhook Error] Failed to update order status:', error);
@@ -170,7 +171,7 @@ router.post('/mock-pay/:id', async (req, res) => {
     // 2. Tax Invoice PDF link message sent after payment confirmation
     await whatsapp.sendMessage(
       order.customerPhone,
-      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${order.id}`
+      `📄 Here is your Tax Invoice (INV-2026-${order.id}):\n${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`
     );
 
     // If it's a browser submit form POST, redirect them to success

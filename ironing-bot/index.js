@@ -90,17 +90,25 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/payments', paymentsRoutes);
 
-// Clean corporate payment checkout URL (e.g. https://ironing-service.onrender.com/pay/114)
-app.get('/pay/:id', (req, res, next) => {
-  const cleanId = (req.params.id || '').replace(/\D/g, '');
-  req.url = `/mock-checkout/${cleanId}`;
+const { parseOrderHash } = require('./src/utils/securityToken');
+
+// Encrypted corporate payment checkout URL (e.g. https://ironing-service.onrender.com/pay/pay_sec_114xa7f92b41)
+app.get('/pay/:token', (req, res, next) => {
+  const orderId = parseOrderHash(req.params.token, 'pay');
+  if (!orderId) {
+    return res.status(404).send('Invalid or expired payment link');
+  }
+  req.url = `/mock-checkout/${orderId}`;
   return paymentRoutes(req, res, next);
 });
 
-// Clean corporate tax invoice PDF URL (e.g. https://ironing-service.onrender.com/invoice/117)
-app.get('/invoice/:id', (req, res, next) => {
-  const cleanId = (req.params.id || '').replace(/\D/g, '');
-  req.url = `/${cleanId}/invoice`;
+// Encrypted corporate tax invoice PDF URL (e.g. https://ironing-service.onrender.com/invoice/inv_sec_114xa7f92b41)
+app.get('/invoice/:token', (req, res, next) => {
+  const orderId = parseOrderHash(req.params.token, 'invoice');
+  if (!orderId) {
+    return res.status(404).send('Invalid or expired invoice link');
+  }
+  req.url = `/${orderId}/invoice`;
   return orderRoutes(req, res, next);
 });
 

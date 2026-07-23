@@ -891,12 +891,24 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                 <span>SMS</span>
               </a>
 
-              {/* Gmail */}
+              {/* Gmail / Email */}
               <a 
-                href={`https://mail.google.com/mail/?view=cm&fs=1&tf=1&su=${encodeURIComponent(shareModalData.subject)}&body=${encodeURIComponent(shareModalData.emailBody)}`}
+                href={`https://mail.google.com/mail/u/0/?fs=1&tf=1&source=mailto&su=${encodeURIComponent(shareModalData.subject)}&body=${encodeURIComponent(shareModalData.emailBody)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setShareModalData(null)}
+                onClick={(e) => {
+                  if (navigator.share) {
+                    e.preventDefault();
+                    navigator.share({
+                      title: shareModalData.subject,
+                      text: shareModalData.emailBody,
+                      url: shareModalData.url
+                    }).catch(() => {
+                      window.open(`https://mail.google.com/mail/u/0/?fs=1&tf=1&source=mailto&su=${encodeURIComponent(shareModalData.subject)}&body=${encodeURIComponent(shareModalData.emailBody)}`, '_blank');
+                    });
+                  }
+                  setShareModalData(null);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -917,7 +929,7 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                   <path fill="#EA4335" d="M10 8h28c2.2 0 4 1.8 4 4v.5L24 24.5 6 12.5V12c0-2.2 1.8-4 4-4z"/>
                   <path fill="#FBBC04" d="M42 12.5L24 24.5 6 12.5V12c0-.7.2-1.4.6-2L24 22.5 41.4 10c.4.6.6 1.3.6 2v.5z"/>
                 </svg>
-                <span>Gmail</span>
+                <span>Gmail / Email App</span>
               </a>
 
               {/* Copy Link */}

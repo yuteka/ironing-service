@@ -33,21 +33,6 @@ router.get('/:id/invoice', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Invoice ID & PDF are strictly generated only after payment is Paid
-    if (order.paymentStatus !== 'Paid') {
-      return res.status(403).send(`
-        <html>
-          <body style="font-family: system-ui, -apple-system, sans-serif; text-align: center; padding: 60px 20px; background-color: #f8fafc; color: #1e293b;">
-            <div style="max-width: 440px; margin: 0 auto; background: white; padding: 32px; borderRadius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-              <div style="font-size: 40px; margin-bottom: 12px;">🔒</div>
-              <h2 style="color: #ef4444; margin: 0 0 8px 0; font-size: 1.25rem;">Invoice Pending</h2>
-              <p style="font-size: 0.9rem; color: #64748b; margin: 0 0 20px 0;">Tax Invoice ID (INV-2026-${order.id}) and PDF receipt are generated only after the payment of ₹${order.totalAmount?.toFixed(2) || '0.00'} is completed.</p>
-            </div>
-          </body>
-        </html>
-      `);
-    }
-
     const invoicesDir = path.join(__dirname, '..', '..', 'uploads', 'invoices');
     if (!fs.existsSync(invoicesDir)) {
       fs.mkdirSync(invoicesDir, { recursive: true });
@@ -58,6 +43,8 @@ router.get('/:id/invoice', async (req, res) => {
     // Always generate/regenerate to ensure details are current
     await pdfService.generateInvoicePDF(order, invoicePath);
 
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="invoice_${order.id}.pdf"`);
     return res.sendFile(invoicePath);
   } catch (error) {
     console.error('[Orders Admin API] Invoice error:', error);

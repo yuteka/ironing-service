@@ -6,6 +6,7 @@ const prisma = require('../services/db');
 const whatsapp = require('../services/whatsapp');
 const pdfService = require('../services/pdf');
 const { authenticateAdmin } = require('../middleware/auth');
+const { generateOrderHash } = require('../utils/securityToken');
 
 const ORDER_INCLUDE = {
   customer: true,
@@ -81,7 +82,15 @@ router.get('/', async (req, res) => {
       include: ORDER_INCLUDE,
       orderBy: { createdAt: 'desc' }
     });
-    return res.json(orders);
+
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
+    const enriched = orders.map(o => ({
+      ...o,
+      paymentLink: `${backendUrl}/pay/${generateOrderHash(o.id, 'pay')}`,
+      invoiceUrl: `${backendUrl}/invoice/${generateOrderHash(o.id, 'invoice')}`
+    }));
+
+    return res.json(enriched);
   } catch (error) {
     console.error('[Orders Admin API] Fetch error:', error);
     return res.status(500).json({ error: 'Failed to fetch orders' });
@@ -104,6 +113,10 @@ router.get('/:id', async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
+
+    const backendUrl = (process.env.BACKEND_URL || 'https://ironing-service.onrender.com').trim().replace(/\/$/, '');
+    order.paymentLink = `${backendUrl}/pay/${generateOrderHash(order.id, 'pay')}`;
+    order.invoiceUrl = `${backendUrl}/invoice/${generateOrderHash(order.id, 'invoice')}`;
 
     return res.json(order);
   } catch (error) {

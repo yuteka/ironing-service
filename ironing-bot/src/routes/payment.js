@@ -224,81 +224,176 @@ router.get('/mock-checkout/:id', async (req, res) => {
 
     const html = `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
-        <title>Razorpay Checkout - Booking #BK2026${String(id).padStart(4, '0')}</title>
+        <title>Razorpay Payment - Booking #BK2026${String(id).padStart(4, '0')}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <style>
+          * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
           body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #f0f7ff, #e0f2fe);
+            background: #f1f5f9;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
           }
-          .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+          .checkout-container {
+            background: #ffffff;
             border-radius: 20px;
-            padding: 36px 30px;
-            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.1);
             width: 100%;
-            max-width: 420px;
-            text-align: center;
+            max-width: 440px;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.15);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
           }
-          .logo { font-size: 1.3rem; font-weight: 800; color: #0F172A; margin-bottom: 6px; }
-          .sub { color: #64748b; font-size: 0.85rem; font-weight: 600; }
-          .amount { font-size: 2.4rem; font-weight: 900; color: #0284c7; margin: 24px 0; }
-          .btn-pay {
+          .header {
             background: linear-gradient(135deg, #0ea5e9, #0284c7);
             color: white;
-            border: none;
-            padding: 16px 28px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
-            transition: transform 0.2s;
+            padding: 24px 20px;
+            text-align: center;
           }
-          .btn-pay:hover { transform: translateY(-2px); }
+          .header h2 { margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; }
+          .header p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+          .amount-banner {
+            background: #f8fafc;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          .amount-label { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+          .amount-value { font-size: 1.6rem; font-weight: 900; color: #0284c7; }
+          
+          .section-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 20px 8px 20px;
+          }
+          
+          .option-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin: 0 20px 12px 20px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .option-card:hover { border-color: #0284c7; background: #f0f9ff; }
+          .option-left { display: flex; alignItems: center; gap: 12px; }
+          .option-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+          .icon-upi { background: #dcfce7; color: #166534; }
+          .icon-card { background: #e0f2fe; color: #0369a1; }
+          .icon-nb { background: #fef3c7; color: #92400e; }
+          .option-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; }
+          .option-desc { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+          
+          .btn-pay-action {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+          }
+
+          .footer-note {
+            text-align: center;
+            padding: 16px 20px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+          }
         </style>
       </head>
       <body>
-        <div class="card">
-          <div class="logo">Ironing Service</div>
-          <div class="sub">Booking #BK2026${String(id).padStart(4, '0')} • ${order.customer?.name || 'Customer'}</div>
+        <div class="checkout-container">
+          <div class="header">
+            <h2>Ironing Service</h2>
+            <p>Booking #BK2026${String(id).padStart(4, '0')} • ${order.customer?.name || 'Customer'}</p>
+          </div>
 
-          <div class="amount">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</div>
+          <div class="amount-banner">
+            <span class="amount-label">Total Payable Amount</span>
+            <span class="amount-value">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</span>
+          </div>
 
-          <button id="rzp-button" class="btn-pay">Pay with Razorpay</button>
+          <div class="section-title">Select Payment Method (Test Mode)</div>
 
-          <!-- Test Mode Guidance Box -->
-          <div style="margin-top: 24px; text-align: left; background: #F8FAFC; border: 1px dashed #0284c7; border-radius: 12px; padding: 14px 16px; font-size: 0.8rem; color: #334155;">
-            <div style="font-weight: 800; color: #0284c7; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-              <span>🧪 Razorpay Test Options:</span>
+          <!-- OPTION 1: UPI / GPay / PhonePe / Paytm -->
+          <div class="option-card" onclick="processPayment('UPI (GPay / PhonePe / Paytm)')">
+            <div class="option-left">
+              <div class="option-icon icon-upi">📱</div>
+              <div>
+                <div class="option-title">UPI / GPay / PhonePe / Paytm</div>
+                <div class="option-desc">Google Pay, PhonePe, Paytm, BHIM UPI</div>
+              </div>
             </div>
-            <div style="margin-bottom: 6px;">
-              <strong>• GPay / PhonePe / Paytm / UPI:</strong><br/>
-              Select <em>UPI/QR</em> ➔ Type <code>success@razorpay</code> ➔ Click Pay ➔ Select <em>[ Success ]</em>
+            <button class="btn-pay-action">Pay Now</button>
+          </div>
+
+          <!-- OPTION 2: Credit / Debit Cards -->
+          <div class="option-card" onclick="processPayment('Credit / Debit Card (Visa/Mastercard)')">
+            <div class="option-left">
+              <div class="option-icon icon-card">💳</div>
+              <div>
+                <div class="option-title">Credit & Debit Cards</div>
+                <div class="option-desc">Visa, Mastercard, RuPay Cards</div>
+              </div>
             </div>
-            <div style="margin-bottom: 6px;">
-              <strong>• Credit / Debit Cards:</strong><br/>
-              Card No: <code>4111 1111 1111 1111</code> | Exp: <code>12/30</code> | CVV: <code>123</code>
+            <button class="btn-pay-action">Pay Now</button>
+          </div>
+
+          <!-- OPTION 3: NetBanking -->
+          <div class="option-card" onclick="processPayment('NetBanking (Baroda/Canara/SBI/HDFC)')">
+            <div class="option-left">
+              <div class="option-icon icon-nb">🏦</div>
+              <div>
+                <div class="option-title">NetBanking & Wallets</div>
+                <div class="option-desc">All Major Indian Banks & E-Wallets</div>
+              </div>
             </div>
-            <div>
-              <strong>• NetBanking / Wallets:</strong><br/>
-              Select any Bank / Wallet ➔ Select <em>[ Success ]</em>
-            </div>
+            <button class="btn-pay-action">Pay Now</button>
+          </div>
+
+          <!-- OPTION 4: Official Razorpay Popup Launcher -->
+          <div style="margin: 16px 20px 20px 20px;">
+            <button id="rzp-button" style="width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+              Open Standard Razorpay Popup ➔
+            </button>
+          </div>
+
+          <div class="footer-note">
+            🔒 256-Bit SSL Encrypted • Powered by Razorpay Sandbox
           </div>
         </div>
 
         <script>
+          function processPayment(method) {
+            if (confirm('Complete Test Payment of ₹${parseFloat(order.totalAmount || 0).toFixed(2)} via ' + method + '?')) {
+              fetch('/api/payment/mock-pay/${id}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentMethod: method })
+              }).then(function() {
+                alert('Payment Successful via ' + method + '! Check your WhatsApp for confirmation.');
+                window.location.reload();
+              });
+            }
+          }
+
           var options = {
             "key": "${keyId || 'rzp_test_TGVvt5inYvcxJg'}",
             "amount": "${amountInPaise || 20000}",
@@ -310,39 +405,7 @@ router.get('/mock-checkout/:id', async (req, res) => {
               "name": "${(order.customer?.name || '').replace(/"/g, '')}",
               "contact": "${(order.customerPhone || '').replace(/\D/g, '')}"
             },
-            "theme": {
-              "color": "#0284c7"
-            },
-            "method": {
-              "upi": true,
-              "card": true,
-              "netbanking": true,
-              "wallet": true
-            },
-            "config": {
-              "display": {
-                "sequence": ["block.upi", "block.other"],
-                "preferences": {
-                  "show_default_blocks": true
-                },
-                "blocks": {
-                  "upi": {
-                    "name": "Pay via UPI / GPay / PhonePe / Paytm",
-                    "instruments": [
-                      { "method": "upi" }
-                    ]
-                  },
-                  "other": {
-                    "name": "Cards, Netbanking & Wallets",
-                    "instruments": [
-                      { "method": "card" },
-                      { "method": "netbanking" },
-                      { "method": "wallet" }
-                    ]
-                  }
-                }
-              }
-            },
+            "theme": { "color": "#0284c7" },
             "handler": function (response) {
               fetch('/api/payment/mock-pay/${id}', {
                 method: 'POST',
@@ -360,11 +423,6 @@ router.get('/mock-checkout/:id', async (req, res) => {
             rzp1.open();
             e.preventDefault();
           }
-
-          // Auto open checkout widget
-          window.onload = function() {
-            rzp1.open();
-          };
         </script>
       </body>
       </html>

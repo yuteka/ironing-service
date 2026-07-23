@@ -276,7 +276,26 @@ router.get('/mock-checkout/:id', async (req, res) => {
 
           <div class="amount">₹${parseFloat(order.totalAmount || 0).toFixed(2)}</div>
 
-          <button id="rzp-button" className="btn-pay" class="btn-pay">Pay with Razorpay</button>
+          <button id="rzp-button" class="btn-pay">Pay with Razorpay</button>
+
+          <!-- Test Mode Guidance Box -->
+          <div style="margin-top: 24px; text-align: left; background: #F8FAFC; border: 1px dashed #0284c7; border-radius: 12px; padding: 14px 16px; font-size: 0.8rem; color: #334155;">
+            <div style="font-weight: 800; color: #0284c7; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <span>🧪 Razorpay Test Options:</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <strong>• GPay / PhonePe / Paytm / UPI:</strong><br/>
+              Select <em>UPI/QR</em> ➔ Type <code>success@razorpay</code> ➔ Click Pay ➔ Select <em>[ Success ]</em>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <strong>• Credit / Debit Cards:</strong><br/>
+              Card No: <code>4111 1111 1111 1111</code> | Exp: <code>12/30</code> | CVV: <code>123</code>
+            </div>
+            <div>
+              <strong>• NetBanking / Wallets:</strong><br/>
+              Select any Bank / Wallet ➔ Select <em>[ Success ]</em>
+            </div>
+          </div>
         </div>
 
         <script>

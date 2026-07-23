@@ -427,14 +427,6 @@ async function handleSupportTicketInput(from, description) {
 }
 
 async function sendMainMenu(from, customerName) {
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-  
-  // Only send Price List PDF if the customer has never placed an order before
-  const orderCount = await prisma.order.count({ where: { customerPhone: from } });
-  if (orderCount === 0) {
-    await whatsapp.sendMessage(from, `📄 Price List PDF:\n${backendUrl}/uploads/price_list.pdf`);
-  }
-  
   await whatsapp.sendList(
     from, 
     "How can we help you today?", 

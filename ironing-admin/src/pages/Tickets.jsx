@@ -180,14 +180,14 @@ export default function Tickets({ tickets, resolveTicket, role }) {
                   <th style={{ width: 110 }}>Order</th>
                   <th style={{ width: 150 }}>Category</th>
                   <th style={{ width: 85 }}>Logged Date</th>
-                  <th style={{ width: 75, textAlign: 'center' }}>Status</th>
-                  {isAdmin && <th style={{ width: 70, paddingRight: 14, textAlign: 'center' }}>Actions</th>}
+                  <th style={{ width: 85, textAlign: 'center' }}>Status</th>
+                  <th style={{ width: 95, paddingRight: 14, textAlign: 'center' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {currentPageTickets.length === 0 ? (
                   <tr>
-                    <td colSpan={isAdmin ? 9 : 8} style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                    <td colSpan={9} style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                       No matching tickets found.
                     </td>
                   </tr>
@@ -237,25 +237,28 @@ export default function Tickets({ tickets, resolveTicket, role }) {
                       </td>
                       <td style={{ color: '#64748b', fontSize: '0.75rem' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className={`badge ${t.status === 'Resolved' ? 'badge-paid' : 'badge-pending'}`} style={{ fontWeight: 700, fontSize: '0.67rem', padding: '3px 8px' }}>
-                          {t.status}
+                        <span 
+                          className={`badge ${t.status === 'Resolved' ? 'badge-paid' : 'badge-pending'}`} 
+                          style={{ fontWeight: 700, fontSize: '0.67rem', padding: '4px 10px', cursor: 'pointer' }}
+                          onClick={() => resolveTicket(t.id)}
+                          title="Click to resolve ticket"
+                        >
+                          {t.status === 'Resolved' ? '✓ Resolved' : 'Open'}
                         </span>
                       </td>
-                      {isAdmin && (
-                        <td style={{ paddingRight: 14, textAlign: 'center' }}>
-                          {t.status === 'Open' ? (
-                            <button 
-                              className="btn btn-primary" 
-                              style={{ padding: '5px 8px', fontSize: '0.72rem', borderRadius: '6px', minHeight: 'auto' }}
-                              onClick={() => resolveTicket(t.id)}
-                            >
-                              Resolve
-                            </button>
-                          ) : (
-                            <span style={{ color: '#cbd5e1', fontWeight: 600 }}>-</span>
-                          )}
-                        </td>
-                      )}
+                      <td style={{ paddingRight: 14, textAlign: 'center' }}>
+                        {t.status === 'Open' ? (
+                          <button 
+                            className="btn btn-primary" 
+                            style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '8px', minHeight: 'auto', backgroundColor: '#10b981', borderColor: '#10b981', color: '#fff', cursor: 'pointer' }}
+                            onClick={() => resolveTicket(t.id)}
+                          >
+                            Mark Resolved
+                          </button>
+                        ) : (
+                          <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.72rem' }}>✓ Resolved</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}

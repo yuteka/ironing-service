@@ -1,10 +1,11 @@
-import React from 'react';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
   Users, 
   Ticket, 
+  Tag, 
   LogOut, 
+  AlertCircle,
   DollarSign,
   Settings,
   Truck
@@ -13,67 +14,81 @@ import {
 export default function Sidebar({ activeTab, setActiveTab, isMockMode, handleLogout, role }) {
   const isAdmin = role === 'admin';
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'orders', label: 'Manage Bookings', icon: ShoppingBag },
-    { id: 'partners', label: 'Pickup Partners', icon: Truck },
-    { id: 'customers', label: 'Manage Customers', icon: Users },
-    { id: 'payments', label: 'Manage Payments', icon: DollarSign },
-    { id: 'tickets', label: 'Support Tickets', icon: Ticket },
-    { id: 'settings', label: 'System Settings', icon: Settings },
-  ];
-
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 flex flex-col justify-between p-4 shadow-sm z-30 flex-shrink-0">
-      {/* Brand Header */}
-      <div>
-        <div className="flex items-center gap-3 px-3 py-4 mb-4 border-b border-slate-100">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
-            <ShoppingBag size={20} />
-          </div>
-          <span className="font-extrabold text-lg text-slate-900 tracking-tight">Ironing Service</span>
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <div className="brand-icon">
+          <ShoppingBag size={20} />
         </div>
-
-        {/* Navigation Menu */}
-        <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-sky-50 text-sky-700 shadow-xs border border-sky-100/80'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-sky-600' : 'text-slate-400'} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+        <span className="brand-name">Ironing Service</span>
       </div>
 
-      {/* Sidebar Footer */}
-      <div className="pt-4 border-t border-slate-100 space-y-3">
-        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 border border-slate-200/60 rounded-xl">
-          <div className="w-9 h-9 rounded-full bg-sky-600 text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
-            {isAdmin ? 'A' : 'S'}
-          </div>
-          <div className="overflow-hidden">
-            <div className="font-bold text-xs text-slate-900 truncate">{isAdmin ? 'Administrator' : 'Sub-Admin'}</div>
-            <div className="text-[11px] font-semibold text-slate-500 truncate">{isAdmin ? 'Store Owner' : 'Staff Operator'}</div>
+      <ul className="sidebar-menu">
+        <li 
+          className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          <LayoutDashboard className="menu-icon" />
+          <span>Dashboard</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'orders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('orders')}
+        >
+          <ShoppingBag className="menu-icon" />
+          <span>Manage Bookings</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'partners' ? 'active' : ''}`}
+          onClick={() => setActiveTab('partners')}
+        >
+          <Truck className="menu-icon" />
+          <span>Pickup Partners</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'customers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('customers')}
+        >
+          <Users className="menu-icon" />
+          <span>Manage Customers</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'payments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('payments')}
+        >
+          <DollarSign className="menu-icon" />
+          <span>Manage Payments</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'tickets' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tickets')}
+        >
+          <Ticket className="menu-icon" />
+          <span>Support Tickets</span>
+        </li>
+        <li 
+          className={`menu-item ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          <Settings className="menu-icon" />
+          <span>System Settings</span>
+        </li>
+      </ul>
+
+      <div className="sidebar-footer">
+        <div className="profile-card" style={{ marginBottom: 16 }}>
+          <div className="profile-avatar">{isAdmin ? 'A' : 'S'}</div>
+          <div className="profile-info">
+            <div className="profile-name">{isAdmin ? 'Administrator' : 'Sub-Admin'}</div>
+            <div className="profile-role">{isAdmin ? 'Store Owner' : 'Staff Operator'}</div>
           </div>
         </div>
-
         <button 
+          className="menu-item" 
+          style={{ width: '100%', border: 'none', background: 'transparent', textAlign: 'left' }}
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm text-red-600 hover:bg-red-50 transition-all cursor-pointer"
         >
-          <LogOut size={18} className="text-red-500" />
+          <LogOut className="menu-icon" />
           <span>Sign Out</span>
         </button>
       </div>

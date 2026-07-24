@@ -89,73 +89,69 @@ export default function Tickets({ tickets, resolveTicket, role }) {
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Page Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4 relative z-10">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Support Center</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">
+    <div>
+      <header className="page-header" style={{ position: 'relative', zIndex: 100 }}>
+        <div className="page-title-group">
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#1f2937', letterSpacing: '-0.01em', margin: 0 }}>
+            Support Center
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4, fontWeight: 400 }}>
             Manage customer queries, complaints, and cloth damage/missing reports.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <button 
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
-            >
-              <Download size={16} />
-              <span>Export</span>
-              <ChevronDown size={14} />
-            </button>
-            
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => { handleExportExcel(); setShowExportMenu(false); }}
-                >
-                  <FileText size={16} className="text-emerald-600" />
-                  <span>Export to Excel (.xlsx)</span>
-                </button>
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => { handleExportPDF(); setShowExportMenu(false); }}
-                >
-                  <FileText size={16} className="text-red-500" />
-                  <span>Export to PDF (.pdf)</span>
-                </button>
-              </div>
-            )}
-          </div>
+        <div style={{ position: 'relative' }}>
+          <button className="btn btn-primary" onClick={() => setShowExportMenu(!showExportMenu)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Download size={16} />
+            <span>Export</span>
+            <ChevronDown size={14} />
+          </button>
+          
+          {showExportMenu && (
+            <div style={{ position: 'absolute', top: '110%', right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', width: 160 }}>
+              <button onClick={() => { handleExportExcel(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+                <FileText size={16} style={{ color: '#10b981' }}/> Excel (CSV)
+              </button>
+              <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+                <FileText size={16} style={{ color: '#ef4444' }}/> PDF Report
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Filter and Search Controls Row */}
-      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-xl max-w-md w-full">
-          <Search size={16} className="text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search by ID, name, category..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="bg-transparent border-none outline-none w-full text-sm font-bold text-slate-900 placeholder:text-slate-400"
-          />
-        </div>
+      <div className="data-card" style={{ padding: 18, marginBottom: 20, overflow: 'visible', zIndex: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
+          
+          {/* Search Box */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: 'var(--bg-slate)', border: '1px solid var(--border-light)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', flex: 1, maxWidth: 350 }}>
+            <Search size={16} style={{ color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search by ID, name, category..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.85rem' }}
+            />
+          </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Status:</span>
-          <CustomSelect 
-            options={[
-              { label: 'All Tickets', value: 'all' },
-              { label: 'Open', value: 'Open' },
-              { label: 'Resolved', value: 'Resolved' }
-            ]}
-            value={filterStatus}
-            onChange={setFilterStatus}
-            width={120}
-          />
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {/* Status Filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Status:</span>
+              <CustomSelect 
+                options={[
+                  { label: 'All Tickets', value: 'all' },
+                  { label: 'Open', value: 'Open' },
+                  { label: 'Resolved', value: 'Resolved' }
+                ]}
+                value={filterStatus}
+                onChange={setFilterStatus}
+                width={120}
+              />
+            </div>
+          </div>
+
         </div>
       </div>
 

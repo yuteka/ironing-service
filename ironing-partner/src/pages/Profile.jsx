@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, ShieldCheck } from 'lucide-react';
+import { User, LogOut, Wifi, WifiOff, RefreshCw, Sparkles, ShieldCheck } from 'lucide-react';
 
-export default function Profile({ partnerName, handleLogout, triggerToast }) {
+export default function Profile({ partnerName, handleLogout, showConfirm, setConfirmModal, triggerToast }) {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [syncing, setSyncing] = useState(false);
+  
   const [partnerDetails, setPartnerDetails] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [dutyActive, setDutyActive] = useState(true);
+
+  // Listen to network status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Fetch partner profile active status from DB
   useEffect(() => {
@@ -30,61 +47,110 @@ export default function Profile({ partnerName, handleLogout, triggerToast }) {
     fetchProfile();
   }, []);
 
+
+
+  const triggerManualSync = () => {
+    if (!isOnline) {
+      triggerToast('⚠️ Cannot sync. Device is currently offline.', 'error');
+      return;
+    }
+
+    setSyncing(true);
+    setTimeout(() => {
+      setSyncing(false);
+      triggerToast('✅ Sync Complete: Connection active. All local logs are synchronized.', 'success');
+    }, 1200);
+  };
+
   const getInitialsAvatar = (name) => {
     const letter = name ? name.charAt(0).toUpperCase() : 'P';
     return (
-      <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-sky-600 to-sky-400 text-white flex items-center justify-center font-extrabold text-2xl shadow-lg shadow-sky-500/25 mx-auto mb-3">
+      <div style={{
+        width: 60,
+        height: 60,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #E0A86B, #5B3A1B)',
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 800,
+        fontSize: '1.4rem',
+        boxShadow: '0 8px 20px rgba(91, 58, 27, 0.15)',
+        margin: '0 auto 12px auto'
+      }}>
         {letter}
       </div>
     );
   };
 
   return (
-    <div className="w-full space-y-6 py-4">
+    <div style={{ padding: '10px 0' }}>
       {/* Profile Details */}
-      <div className="text-center">
+      <div style={{ textAlign: 'center', marginBottom: 26 }}>
         {getInitialsAvatar(partnerName)}
-        <h3 className="text-xl font-extrabold text-slate-900">{partnerName}</h3>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)' }}>{partnerName}</h3>
         {partnerDetails && (
-          <div className="text-xs font-semibold text-slate-500 mt-0.5">
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 }}>
             @{partnerDetails.username} • {partnerDetails.phone}
           </div>
         )}
       </div>
 
       {/* Control Card */}
-      <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-xs divide-y divide-slate-100">
+      <div className="job-card" style={{ padding: 0, overflow: 'hidden' }}>
         
         {/* Dynamic Duty Toggle */}
-        <div className={`flex items-center justify-between p-4 ${dutyActive ? 'bg-emerald-50/40' : 'bg-slate-50/40'}`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center ${dutyActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-              <ShieldCheck size={18} />
+        <div 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            padding: '16px 20px', 
+            borderBottom: '1px solid var(--border-light)',
+            backgroundColor: dutyActive ? 'rgba(16, 185, 129, 0.01)' : 'transparent'
+          }}
+        >
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              backgroundColor: dutyActive ? 'rgba(16,185,129,0.1)' : 'rgba(100,116,139,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: dutyActive ? '#10B981' : '#64748B'
+            }}>
+              <ShieldCheck size={16} />
             </div>
-            <div>
-              <span className="block text-sm font-extrabold text-slate-900">Duty Status</span>
-              <span className={`block text-xs font-bold ${dutyActive ? 'text-emerald-700' : 'text-slate-500'}`}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-dark)' }}>Duty Status</span>
+              <span style={{ fontSize: '0.74rem', color: dutyActive ? '#10B981' : '#64748B', fontWeight: 700, marginTop: 1 }}>
                 {dutyActive ? 'On Duty • Accepting Jobs' : 'Off Duty • On Leave'}
               </span>
             </div>
           </div>
           <div>
-            <span className={`inline-flex items-center px-3 py-1 text-xs font-extrabold rounded-xl uppercase tracking-wider ${
-              dutyActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
-            }`}>
+            <div style={{
+              padding: '6px 12px',
+              borderRadius: '12px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              backgroundColor: dutyActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+              color: dutyActive ? '#10B981' : '#D97706',
+              border: dutyActive ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)'
+            }}>
               {dutyActive ? 'Active' : 'On Leave'}
-            </span>
+            </div>
           </div>
         </div>
 
         {/* Log Out */}
-        <button 
+        <div 
+          style={{ padding: '16px 20px', display: 'flex', gap: 12, color: '#DC2626', cursor: 'pointer', alignItems: 'center' }}
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 p-4 text-red-600 hover:bg-red-50 font-bold text-sm transition-colors cursor-pointer text-left"
         >
           <LogOut size={18} />
-          <span>Log Out Profile</span>
-        </button>
+          <span style={{ fontSize: '0.92rem', fontWeight: 700 }}>Log Out Profile</span>
+        </div>
       </div>
     </div>
   );

@@ -143,41 +143,148 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div style={{ position: 'relative', overflow: 'visible', animation: 'fadeInPage 0.45s ease-out' }}>
+      
+      {/* Dynamic Blurred Background Orbs */}
+      <style>{`
+        @keyframes fadeInPage {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+          0% { transform: scale(0.95); opacity: 0.5; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+          70% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+          100% { transform: scale(0.95); opacity: 0.5; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .bg-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(130px);
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0.12;
+        }
+        .bg-orb-blue {
+          top: -20px;
+          right: 10%;
+          width: 320px;
+          height: 320px;
+          background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+        }
+        .bg-orb-purple {
+          bottom: 20%;
+          left: 5%;
+          width: 280px;
+          height: 280px;
+          background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+        }
+        .fintech-card {
+          background: rgba(255, 255, 255, 0.75);
+          backdrop-filter: blur(24px) saturate(180%);
+          -webkit-backdrop-filter: blur(24px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.45);
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+          border-radius: 18px;
+          padding: 24px;
+          position: relative;
+          overflow: hidden;
+          z-index: 1;
+        }
+        .metric-glow-card {
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          border: 1px solid rgba(255, 255, 255, 0.45);
+        }
+        .metric-glow-card:hover {
+          transform: translateY(-5px) scale(1.01);
+          border-color: rgba(14, 165, 233, 0.35);
+          box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+        }
+        .fin-row {
+          transition: all 0.2s ease;
+        }
+        .fin-row:hover {
+          background-color: rgba(241, 245, 249, 0.75) !important;
+        }
+        .pulse-indicator {
+          width: 10px;
+          height: 10px;
+          background-color: #10b981;
+          border-radius: 50%;
+          animation: pulseGlow 2s infinite;
+        }
+        .btn-premium {
+          transition: all 0.25s ease;
+        }
+        .btn-premium:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px -4px rgba(14, 165, 233, 0.4);
+        }
+        .search-glass {
+          transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .search-glass:focus-within {
+          border-color: #0ea5e9 !important;
+          box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+        }
+        .subtab-btn {
+          padding: 12px 24px;
+          font-size: 0.92rem;
+          font-weight: 700;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+      `}</style>
+
+      {/* Floating Ambient Background */}
+      <div className="bg-orb bg-orb-blue"></div>
+      <div className="bg-orb bg-orb-purple"></div>
+
       {/* Page Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4 relative z-10">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Payment Transactions</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">
+      <header className="page-header" style={{ position: 'relative', zIndex: 100, marginBottom: 26 }}>
+        <div className="page-title-group">
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#1f2937', letterSpacing: '-0.01em', margin: 0 }}>
+            Payment Transactions
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4, fontWeight: 400 }}>
             A list of your recent sales and payments
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
             <button 
+              className="btn btn-primary btn-premium" 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 8, 
+                padding: '10px 18px', 
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                border: 'none',
+                borderRadius: '12px',
+                color: '#ffffff',
+                boxShadow: '0 4px 14px rgba(14, 165, 233, 0.25)'
+              }} 
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
-              <Download size={16} />
+              <Download size={15} />
               <span>Export Ledger</span>
               <ChevronDown size={14} />
             </button>
             
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => { handleExportExcel(); setShowExportMenu(false); }}
-                >
-                  <FileText size={16} className="text-emerald-600" />
-                  <span>Export to Excel (.xlsx)</span>
+              <div style={{ position: 'absolute', top: '110%', right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', width: 160 }}>
+                <button onClick={() => { handleExportExcel(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+                  <FileText size={16} style={{ color: '#10b981' }}/> Excel (CSV)
                 </button>
-                <button 
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => { handleExportPDF(); setShowExportMenu(false); }}
-                >
-                  <FileText size={16} className="text-red-500" />
-                  <span>Export to PDF (.pdf)</span>
+                <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+                  <FileText size={16} style={{ color: '#ef4444' }}/> PDF Report
                 </button>
               </div>
             )}

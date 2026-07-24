@@ -218,20 +218,7 @@ export default function OrderDrawer({
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0' }}>
-            <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-              Partner Assignment Notes
-            </div>
-            {partnerAssignmentNote ? (
-              <div style={{ backgroundColor: '#FFFBEB', color: '#B45309', padding: '12px 16px', borderRadius: 8, fontSize: '0.85rem', border: '1px solid #FEF3C7', fontWeight: 500, lineHeight: 1.5 }}>
-                {partnerAssignmentNote}
-              </div>
-            ) : (
-              <div style={{ backgroundColor: '#F8FAFC', color: '#64748b', padding: '12px 16px', borderRadius: 8, fontSize: '0.85rem', border: '1px solid #E2E8F0', fontWeight: 500 }}>
-                No assignment notes
-              </div>
-            )}
-          </div>
+
 
           <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0' }}>
             <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 8 }}>

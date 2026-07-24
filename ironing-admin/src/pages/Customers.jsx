@@ -1001,26 +1001,26 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
                 </div>
 
                 {/* GST Tax Breakdown */}
-                <div style={{ backgroundColor: '#F1F5F9', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: 10, letterSpacing: '0.04em' }}>
+                <div className="bg-slate-100/90 rounded-2xl p-4 mb-5 space-y-2 border border-slate-200/80">
+                  <div className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2">
                     Tax & Computation Breakdown
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
+                  <div className="flex justify-between text-xs font-bold text-slate-600">
                     <span>Base Amount (Excl. Tax)</span>
                     <span>₹{baseAmtFormatted}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 6, color: '#475569' }}>
+                  <div className="flex justify-between text-xs font-bold text-slate-600">
                     <span>GST (5%)</span>
                     <span>₹{taxAmtFormatted}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.92rem', fontWeight: 800, borderTop: '1px solid #CBD5E1', paddingTop: 8, marginTop: 8, color: '#0F172A' }}>
+                  <div className="flex justify-between text-sm font-extrabold border-t border-slate-300 pt-2 text-slate-900">
                     <span>Total Amount Billed</span>
                     <span>₹{amtFormatted}</span>
                   </div>
                 </div>
 
                 {/* Action Buttons: Download & Share Tax Invoice */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="flex flex-col gap-2.5">
                   {/* Share Tax Invoice Button */}
                   {(() => {
                     const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
@@ -1029,8 +1029,7 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
                       <>
                         {selectedPaymentOrder.paymentStatus === 'Paid' && (
                           <button
-                            className="btn btn-primary"
-                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 18px', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', marginBottom: 10 }}
+                            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                             onClick={() => {
                               window.open(invoiceUrl, '_blank');
                             }}
@@ -1048,7 +1047,7 @@ export default function Customers({ customers, loading, loadAllData, triggerToas
                             subject: `Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')}`,
                             emailBody: `Hi ${custName},\n\nPlease find your Tax Invoice for Booking BK2026${String(selectedPaymentOrder.id).padStart(4, '0')} at the link below:\n${invoiceUrl}\n\nThank you,\nIroning Service`
                           })}
-                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 16px', background: '#10B981', color: 'white', borderRadius: 12, fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', border: 'none', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}
+                          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
                         >
                           <Share2 size={16} /> Share Tax Invoice
                         </button>

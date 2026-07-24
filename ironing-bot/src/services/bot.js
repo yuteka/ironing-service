@@ -40,8 +40,16 @@ const STATES = {
  * @param {Object} message - Incoming WhatsApp message payload.
  */
 async function handleTextMessage(from, message) {
-  const customer = await prisma.customer.findUnique({
-    where: { phone: from }
+  const cleanFrom = from ? String(from).replace(/\D/g, '') : '';
+  const customer = await prisma.customer.findFirst({
+    where: {
+      OR: [
+        { phone: from },
+        { phone: cleanFrom },
+        { phone: `+${cleanFrom}` },
+        { phone: cleanFrom.length >= 10 ? cleanFrom.slice(-10) : cleanFrom }
+      ]
+    }
   });
 
   // If customer doesn't exist OR has pending registration steps, initiate registration flow
@@ -127,8 +135,16 @@ async function handleTextMessage(from, message) {
  * @param {string} buttonId - Selected button identifier.
  */
 async function handleButtonClick(from, buttonId) {
-  const customer = await prisma.customer.findUnique({
-    where: { phone: from }
+  const cleanFrom = from ? String(from).replace(/\D/g, '') : '';
+  const customer = await prisma.customer.findFirst({
+    where: {
+      OR: [
+        { phone: from },
+        { phone: cleanFrom },
+        { phone: `+${cleanFrom}` },
+        { phone: cleanFrom.length >= 10 ? cleanFrom.slice(-10) : cleanFrom }
+      ]
+    }
   });
 
   if (!customer) {

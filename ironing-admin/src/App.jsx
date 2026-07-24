@@ -155,50 +155,40 @@ export default function App() {
     'Authorization': `Bearer ${token}`
   });
 
-  // Fetch initial data
+  // Handle automatic real-time background sync (polls every 5s)
   useEffect(() => {
-    if (token) {
-      loadAllData();
-    }
+    if (!token) return;
+
+    // Initial full load
+    loadAllData(false);
+
+    // Live real-time background polling every 5 seconds
+    const interval = setInterval(() => {
+      loadAllData(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
-  // Handle SSE for real-time updates
-  useEffect(() => {
-    if (!token || isMockMode) return;
-    
-    const eventSource = new EventSource(`${API_BASE}/stream`);
-    
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'orders_updated') {
-           fetchOrders(); 
-        }
-      } catch(e) {}
-    };
-    
-    return () => {
-      eventSource.close();
-    };
-  }, [token, isMockMode]);
-
-  const loadAllData = async () => {
-    setLoading(true);
+  const loadAllData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const healthUrl = API_BASE.replace(/\/api$/, '') + '/health';
       const healthRes = await fetch(healthUrl).catch(() => null);
       if (!healthRes) {
-        console.warn('Backend server unreachable. Enabling client-side Mock Mode.');
-        setIsMockMode(true);
-        setOrders(MOCK_ORDERS);
-        setPartners(MOCK_PARTNERS);
-        setTickets(MOCK_TICKETS);
-        setCatalog(MOCK_CATALOG);
-        setPayments(MOCK_ORDERS.filter(o => o.paymentStatus === 'Paid'));
-        setCustomers([
-          { phone: '919876543210', name: 'Anand Kumar', address: 'Flat 402, Green Meadows', landmark: 'Central Park', totalOrders: 1, orders: [MOCK_ORDERS[0]] }
-        ]);
-        calculateMockMetrics(MOCK_ORDERS);
+        if (!isMockMode) {
+          console.warn('Backend server unreachable. Enabling client-side Mock Mode.');
+          setIsMockMode(true);
+          setOrders(MOCK_ORDERS);
+          setPartners(MOCK_PARTNERS);
+          setTickets(MOCK_TICKETS);
+          setCatalog(MOCK_CATALOG);
+          setPayments(MOCK_ORDERS.filter(o => o.paymentStatus === 'Paid'));
+          setCustomers([
+            { phone: '919876543210', name: 'Anand Kumar', address: 'Flat 402, Green Meadows', landmark: 'Central Park', totalOrders: 1, orders: [MOCK_ORDERS[0]] }
+          ]);
+          calculateMockMetrics(MOCK_ORDERS);
+        }
       } else {
         setIsMockMode(false);
         await Promise.all([
@@ -214,7 +204,7 @@ export default function App() {
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 

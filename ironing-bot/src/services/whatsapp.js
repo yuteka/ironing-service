@@ -7,12 +7,10 @@ async function getCredentials() {
 
   try {
     const dbSettings = await prisma.businessSettings.findUnique({ where: { id: 1 } });
-    if (dbSettings) {
-      const token = (dbSettings.whatsappToken || envToken).trim();
-      const phoneId = (dbSettings.whatsappPhoneId || envPhoneId).trim();
-      const isMock = !token || token.startsWith('your_') || token === 'mock_token' || !phoneId || phoneId.startsWith('your_');
-      return { token, phoneId, isMock };
-    }
+    const token = (envToken || dbSettings?.whatsappToken || '').trim();
+    const phoneId = (envPhoneId || dbSettings?.whatsappPhoneId || '').trim();
+    const isMock = !token || token.startsWith('your_') || token === 'mock_token' || !phoneId || phoneId.startsWith('your_');
+    return { token, phoneId, isMock };
   } catch (e) {
     console.error('[WhatsApp Service] Error reading DB settings:', e.message);
   }

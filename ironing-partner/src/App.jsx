@@ -479,96 +479,44 @@ export default function App() {
 
   return (
     <>
-      {/* ── Blue Toast Notification ── */}
+      {/* ── Toast Notification ── */}
       {toast && (
-        <div style={{
-          position: 'fixed',
-          top: 16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 9999,
-          minWidth: 260,
-          maxWidth: 'calc(100vw - 32px)',
-          background: 'rgba(15, 23, 42, 0.96)',
-          backdropFilter: 'blur(12px)',
-          borderLeft: toast.type === 'error'
-            ? '4px solid #EF4444'
-            : toast.type === 'info'
-              ? '4px solid #3B82F6'
-              : '4px solid #0EA5E9',
-          boxShadow: '0 10px 30px -5px rgba(0,0,0,0.3)',
-          borderRadius: 12,
-          padding: '14px 18px',
-          color: '#ffffff',
-          fontWeight: 600,
-          fontSize: '0.85rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          animation: 'toastIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards'
-        }}>
-          <style>{`@keyframes toastIn { from { transform: translateX(-50%) translateY(-16px) scale(0.95); opacity:0; } to { transform: translateX(-50%) translateY(0) scale(1); opacity:1; } }`}</style>
-          {toast.type === 'error' && <AlertTriangle size={17} style={{ color: '#EF4444', flexShrink: 0 }} />}
-          {toast.type === 'info' && <Info size={17} style={{ color: '#60A5FA', flexShrink: 0 }} />}
-          {toast.type === 'success' && <CheckCircle2 size={17} style={{ color: '#38BDF8', flexShrink: 0 }} />}
-          <span style={{ letterSpacing: '0.2px', lineHeight: 1.4 }}>{toast.message}</span>
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 min-w-64 max-w-[calc(100vw-32px)] bg-slate-900/95 backdrop-blur-md border-l-4 shadow-2xl rounded-2xl p-4 text-white font-bold text-xs flex items-center gap-3 animate-in slide-in-from-top-4 duration-200 ${
+          toast.type === 'error' ? 'border-l-red-500' : toast.type === 'info' ? 'border-l-sky-500' : 'border-l-emerald-500'
+        }`}>
+          {toast.type === 'error' && <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />}
+          {toast.type === 'info' && <Info size={18} className="text-sky-400 flex-shrink-0" />}
+          {toast.type === 'success' && <CheckCircle2 size={18} className="text-sky-400 flex-shrink-0" />}
+          <span className="leading-relaxed">{toast.message}</span>
         </div>
       )}
 
-      {/* ── Glassmorphic Confirm Modal ── */}
+      {/* ── Confirm Modal ── */}
       {confirmModal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 10000,
-          background: 'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(6px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 24,
-          animation: 'fadeIn 0.2s ease'
-        }}>
-          <style>{`@keyframes fadeIn { from { opacity:0; } to { opacity:1; } } @keyframes scaleIn { from { transform: scale(0.92); opacity:0; } to { transform: scale(1); opacity:1; } }`}</style>
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.97)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20,
-            padding: '28px 24px',
-            maxWidth: 340,
-            width: '100%',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            animation: 'scaleIn 0.22s cubic-bezier(0.16,1,0.3,1) forwards'
-          }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16
-            }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                background: confirmModal.danger ? 'rgba(239,68,68,0.15)' : 'rgba(59,130,246,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-              }}>
-                <AlertTriangle size={20} color={confirmModal.danger ? '#F87171' : '#60A5FA'} />
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-6 animate-in fade-in duration-200">
+          <div className="w-full max-w-xs bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                confirmModal.danger ? 'bg-red-500/10 text-red-400' : 'bg-sky-500/10 text-sky-400'
+              }`}>
+                <AlertTriangle size={20} />
               </div>
-              <p style={{ color: '#F1F5F9', fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
+              <p className="text-sm font-bold text-slate-100 leading-snug">
                 {confirmModal.message}
               </p>
             </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+            <div className="flex gap-2.5 pt-2">
               <button
                 onClick={() => setConfirmModal(null)}
-                style={{
-                  flex: 1, padding: '11px 14px', borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'transparent', color: '#94A3B8',
-                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer'
-                }}
+                className="flex-1 py-2.5 px-3 bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-400 font-bold text-xs rounded-xl transition-all cursor-pointer"
               >
                 {confirmModal.cancelLabel}
               </button>
               <button
                 onClick={confirmModal.onConfirm}
-                style={{
-                  flex: 1, padding: '11px 14px', borderRadius: 10, border: 'none',
-                  background: confirmModal.danger ? '#EF4444' : '#0EA5E9',
-                  color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer'
-                }}
+                className={`flex-1 py-2.5 px-3 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer ${
+                  confirmModal.danger ? 'bg-red-600 hover:bg-red-700' : 'bg-sky-600 hover:bg-sky-700'
+                }`}
               >
                 {confirmModal.confirmLabel}
               </button>
@@ -579,43 +527,27 @@ export default function App() {
 
       {/* ── Reschedule Date Modal ── */}
       {rescheduleModal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 10000,
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(6px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 24,
-          animation: 'fadeIn 0.2s ease'
-        }}>
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.97)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20,
-            padding: '28px 24px',
-            maxWidth: 340,
-            width: '100%',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
-            animation: 'scaleIn 0.22s cubic-bezier(0.16,1,0.3,1) forwards'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h3 style={{ color: '#F1F5F9', fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-6 animate-in fade-in duration-200">
+          <div className="w-full max-w-xs bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-slate-100">
                 📅 Reschedule Pickup
               </h3>
               <button
                 onClick={() => setRescheduleModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#64748B', cursor: 'pointer', padding: 4 }}
+                className="p-1 text-slate-400 hover:text-slate-200 rounded-full transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: 20, lineHeight: 1.5 }}>
-              Select a new pickup date for <strong style={{ color: '#CBD5E1' }}>{activeJob?.customer?.name}</strong>.
+            <p className="text-xs font-semibold text-slate-400 leading-relaxed">
+              Select a new pickup date for <strong className="text-slate-200">{activeJob?.customer?.name}</strong>.
               The customer will be notified on WhatsApp automatically.
             </p>
 
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', color: '#94A3B8', fontSize: '0.8rem', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 New Pickup Date
               </label>
               <input
@@ -623,42 +555,20 @@ export default function App() {
                 value={rescheduleDate}
                 min={new Date().toISOString().split('T')[0]}
                 onChange={e => setRescheduleDate(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  borderRadius: 10,
-                  border: '1px solid rgba(14, 165, 233, 0.4)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#F1F5F9',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  colorScheme: 'dark'
-                }}
+                className="w-full px-3.5 py-2.5 bg-slate-800/60 border border-sky-500/40 rounded-xl text-slate-100 font-bold text-sm outline-none focus:border-sky-500 transition-all dark-calendar"
               />
             </div>
 
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="flex gap-2.5 pt-2">
               <button
                 onClick={() => setRescheduleModal(false)}
-                style={{
-                  flex: 1, padding: '12px', borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'transparent', color: '#94A3B8',
-                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer'
-                }}
+                className="flex-1 py-2.5 bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-400 font-bold text-xs rounded-xl transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRescheduleSubmit}
-                style={{
-                  flex: 1, padding: '12px', borderRadius: 10, border: 'none',
-                  background: 'linear-gradient(135deg, #0EA5E9, #38BDF8)',
-                  color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(14,165,233,0.4)'
-                }}
+                className="flex-1 py-2.5 bg-gradient-to-tr from-sky-600 to-sky-400 hover:from-sky-700 hover:to-sky-500 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
               >
                 Confirm
               </button>
@@ -701,21 +611,22 @@ export default function App() {
           setItemNotes={setItemNotes}
         />
       ) : (
-        <div className="mobile-layout">
-          <div className="app-bar">
+        <div className="min-h-screen bg-slate-50 flex flex-col pb-20">
+          {/* Header Bar */}
+          <div className="bg-white border-b border-slate-200/80 px-5 py-4 flex items-center justify-between shadow-xs sticky top-0 z-30">
             <div>
-              <div className="app-bar-subtitle">Welcome back,</div>
-              <h1>{partnerName}</h1>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Welcome back,</div>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">{partnerName}</h1>
             </div>
             <button
-              style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)' }}
               onClick={handleLogout}
+              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
             >
               <LogOut size={20} />
             </button>
           </div>
 
-          <div className="content-area">
+          <div className="p-5 flex-1 max-w-lg mx-auto w-full">
             {activeTab === 'jobs' && (
               <JobList
                 jobs={jobs}
@@ -741,21 +652,26 @@ export default function App() {
             )}
           </div>
 
-          <nav className="bottom-nav">
-            <div
-              className={`nav-tab ${activeTab === 'jobs' ? 'active' : ''}`}
+          {/* Bottom Nav */}
+          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200/80 px-6 py-2 flex justify-around items-center z-40 shadow-lg">
+            <button
               onClick={() => setActiveTab('jobs')}
+              className={`flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'jobs' ? 'text-sky-600 font-extrabold' : 'text-slate-400 font-semibold hover:text-slate-600'
+              }`}
             >
               <ShoppingBag size={20} />
-              <span>Active Tasks</span>
-            </div>
-            <div
-              className={`nav-tab ${activeTab === 'profile' ? 'active' : ''}`}
+              <span className="text-[11px]">Active Tasks</span>
+            </button>
+            <button
               onClick={() => setActiveTab('profile')}
+              className={`flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'profile' ? 'text-sky-600 font-extrabold' : 'text-slate-400 font-semibold hover:text-slate-600'
+              }`}
             >
               <User size={20} />
-              <span>My Profile</span>
-            </div>
+              <span className="text-[11px]">My Profile</span>
+            </button>
           </nav>
         </div>
       )}

@@ -26,7 +26,6 @@ export default function Catalog({ catalog, saveCatalog }) {
     e.preventDefault();
     if (!editingItem || editingItem.itemName.trim() === '') return;
 
-
     const parsedRate = parseFloat(editingItem.rate);
     const finalRate = isNaN(parsedRate) || parsedRate < 0 ? 0 : parsedRate;
     const isNew = typeof editingItem.id === 'string' && editingItem.id.startsWith('new-');
@@ -68,119 +67,98 @@ export default function Catalog({ catalog, saveCatalog }) {
   };
 
   return (
-    <div>
-      <style>{`
-        @keyframes slideOutDrawer {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
-
-      <header className="page-header" style={{ marginBottom: '20px' }}>
-        <div className="page-title-group">
-          <h1>Price Catalog</h1>
-          <p>Modify service charges for clothing items. Changes automatically apply to bot responses.</p>
+    <div className="w-full space-y-6">
+      {/* Page Header */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Price Catalog</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
+            Modify service charges for clothing items. Changes automatically apply to bot responses.
+          </p>
         </div>
         <div>
-          <button className="btn btn-primary" onClick={handleOpenAdd} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button 
+            onClick={handleOpenAdd} 
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
+          >
             <Plus size={16} />
             <span>Add Clothes Item</span>
           </button>
         </div>
       </header>
 
-      <div className="data-card" style={{ maxWidth: 750 }}>
-        <div className="card-body" style={{ padding: 0 }}>
-          <div className="custom-table-wrapper">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th style={{ width: 80 }}>S.No.</th>
-                  <th>Item Description</th>
-                  <th>Rate (INR)</th>
-                  <th style={{ width: 120 }}>Status</th>
-                  <th style={{ width: 120, textAlign: 'center' }}>Actions</th>
+      {/* Data Card */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-700 border-collapse">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase font-extrabold text-slate-500 tracking-wider">
+                <th className="px-6 py-4 w-20">S.No.</th>
+                <th className="px-6 py-4">Item Description</th>
+                <th className="px-6 py-4">Rate (INR)</th>
+                <th className="px-6 py-4 w-32">Status</th>
+                <th className="px-6 py-4 w-32 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {catalog.map((item, idx) => (
+                <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-400">{idx + 1}</td>
+                  <td className="px-6 py-4 font-bold text-slate-900">{item.itemName}</td>
+                  <td className="px-6 py-4 font-bold text-slate-900 text-base">
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-400 font-semibold text-sm">₹</span>
+                      <span>{parseFloat(item.rate || 0).toFixed(2)}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center px-2.5 py-1 text-xs font-extrabold text-emerald-700 bg-emerald-100/80 rounded-full">
+                      Active
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <button 
+                        onClick={() => handleOpenEdit(item)}
+                        className="p-1.5 text-sky-600 hover:text-sky-800 hover:bg-sky-50 rounded-lg transition-colors cursor-pointer"
+                        title="Edit Item"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteItem(item.id, item.itemName)}
+                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete Item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {catalog.map((item, idx) => (
-                  <tr key={item.id}>
-                    <td style={{ fontWeight: 500, color: 'var(--text-muted)' }}>{idx + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{item.itemName}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>₹</span>
-                        <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
-                          {parseFloat(item.rate || 0).toFixed(2)}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge badge-paid">Active</span>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-                        <button 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary-color)' }}
-                          onClick={() => handleOpenEdit(item)}
-                          title="Edit Item"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444' }}
-                          onClick={() => handleDeleteItem(item.id, item.itemName)}
-                          title="Delete Item"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {catalog.length === 0 && (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-                      No items in catalog. Click "Add Clothes Item" to get started!
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+              {catalog.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-slate-400 font-medium italic">
+                    No items in catalog. Click "Add Clothes Item" to get started!
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Edit/Add Drawer */}
       {drawerOpen && editingItem && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            width: '450px',
-            height: '100vh',
-            backgroundColor: '#ffffff',
-            boxShadow: '-10px 0 30px rgba(0, 0, 0, 0.15)',
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            animation: 'slideOutDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            borderLeft: '1px solid var(--border-light)'
-          }}
-        >
+        <div className="fixed top-0 right-0 w-full max-w-md h-screen bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300">
           {/* Drawer Header */}
-          <div style={{ padding: '24px', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: 'var(--primary-dark)' }}>
+          <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+            <h3 className="text-lg font-extrabold text-slate-900">
               {typeof editingItem.id === 'string' && editingItem.id.startsWith('new-') ? 'Add Clothes Item' : 'Edit Clothes Item'}
             </h3>
             <button 
               onClick={handleCloseDrawer}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}
+              className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -194,13 +172,15 @@ export default function Catalog({ catalog, saveCatalog }) {
                 e.preventDefault();
               }
             }}
-            style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}
+            className="p-6 flex-1 flex flex-col gap-5 overflow-y-auto"
           >
-            <div className="form-group">
-              <label className="form-label">Item Description <span style={{ color: '#EF4444' }}>*</span></label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Item Description <span className="text-red-500">*</span>
+              </label>
               <input 
                 type="text" 
-                className="form-input" 
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-xl text-slate-900 font-bold text-sm outline-none transition-all placeholder:text-slate-400" 
                 value={editingItem.itemName}
                 onChange={e => {
                   setEditingItem({ ...editingItem, itemName: e.target.value });
@@ -211,15 +191,16 @@ export default function Catalog({ catalog, saveCatalog }) {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Rate (INR) <span style={{ color: '#EF4444' }}>*</span></label>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: 12, fontWeight: 600, color: 'var(--text-muted)', zIndex: 1 }}>₹</span>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Rate (INR) <span className="text-red-500">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 font-bold text-slate-400 text-sm">₹</span>
                 <input 
                   type="text" 
                   inputMode="numeric"
-                  className="form-input" 
-                  style={{ paddingLeft: 28 }}
+                  className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-xl text-slate-900 font-extrabold text-sm outline-none transition-all placeholder:text-slate-400" 
                   value={editingItem.rate}
                   onKeyDown={handleKeyDown}
                   onChange={e => {
@@ -237,19 +218,17 @@ export default function Catalog({ catalog, saveCatalog }) {
             </div>
 
             {/* Bottom Actions inside Drawer */}
-            <div style={{ marginTop: 'auto', display: 'flex', gap: 12, paddingTop: 20, borderTop: '1px solid var(--border-light)' }}>
+            <div className="mt-auto pt-6 border-t border-slate-200 flex gap-3">
               <button 
                 type="button" 
-                className="btn btn-secondary" 
-                style={{ flex: 1 }}
+                className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all cursor-pointer"
                 onClick={handleCloseDrawer}
               >
                 Cancel
               </button>
               <button 
                 type="submit" 
-                className="btn btn-primary" 
-                style={{ flex: 1 }}
+                className="flex-1 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-sm rounded-xl shadow-md transition-all cursor-pointer"
               >
                 Save Item
               </button>
@@ -262,17 +241,7 @@ export default function Catalog({ catalog, saveCatalog }) {
       {drawerOpen && (
         <div 
           onClick={handleCloseDrawer}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(15, 23, 42, 0.35)',
-            zIndex: 999,
-            backdropFilter: 'blur(3px)',
-            animation: 'fadeIn 0.2s ease-out'
-          }}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 animate-in fade-in duration-200"
         />
       )}
     </div>

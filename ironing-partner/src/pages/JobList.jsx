@@ -1,88 +1,59 @@
 import React from 'react';
-import { ShoppingBag, RefreshCw, MapPin, User, Clock, Phone, ArrowRight, Truck, Navigation } from 'lucide-react';
+import { ShoppingBag, Phone, MapPin, ArrowRight, RefreshCw, Truck, Clock, User, Navigation } from 'lucide-react';
 
-export default function JobList({ 
-  jobs, 
-  loadJobs, 
-  setActiveJob, 
-  setWorkflowStep, 
-  setCheckedIssues, 
-  setClothNote, 
-  setPhotoAdded, 
-  setQuantities,
-  setItemNotes,
-  handleMarkDelivered
-}) {
-  const pickupsCount = jobs.filter(j => {
-    const s = j.status?.toUpperCase();
-    return s !== 'OUT_FOR_DELIVERY';
-  }).length;
-  
-  const deliveriesCount = jobs.filter(j => {
-    const s = j.status?.toUpperCase();
-    return s === 'OUT_FOR_DELIVERY';
-  }).length;
+export default function JobList({ jobs, setActiveJob, setWorkflowStep, setQuantities, setItemNotes, setCheckedIssues, setClothNote, setPhotoAdded, loadJobs }) {
+  const pickupsCount = jobs.filter(j => j.status?.toUpperCase() !== 'OUT_FOR_DELIVERY' && j.status !== 'Out for Delivery').length;
+  const deliveriesCount = jobs.filter(j => j.status?.toUpperCase() === 'OUT_FOR_DELIVERY' || j.status === 'Out for Delivery').length;
 
   return (
-    <div>
-      <style>{`
-        .partner-job-card {
-          background: #ffffff;
-          border: 1px solid rgba(224, 168, 107, 0.15);
-          border-radius: 16px;
-          padding: 18px;
-          margin-bottom: 16px;
-          box-shadow: 0 4px 20px -4px rgba(91, 58, 27, 0.04);
-          transition: all 0.25s ease;
-          position: relative;
-          overflow: hidden;
-        }
-        .partner-job-card:active {
-          transform: scale(0.98);
-          box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-      `}</style>
-
+    <div className="w-full space-y-5 pb-8">
       {/* Header bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="flex items-center justify-between">
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-dark)' }}>Today's Tasks</h2>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
+          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Today's Tasks</h2>
+          <p className="text-xs font-medium text-slate-500 mt-0.5">
             Manage and track active collection & delivery orders.
           </p>
         </div>
         <button 
-          style={{ border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 4, color: '#E0A86B', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
           onClick={loadJobs}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all cursor-pointer"
         >
           <RefreshCw size={14} />
           <span>Refresh</span>
         </button>
       </div>
 
-      {/* Stats Summary Bubble pills */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-        <div style={{ flex: 1, padding: '10px 12px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <ShoppingBag size={15} style={{ color: '#3B82F6' }} />
+      {/* Stats Summary Banners */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="p-3.5 bg-sky-50/80 border border-sky-100 rounded-2xl flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-xs">
+            <ShoppingBag size={18} />
+          </div>
           <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4B5563', textTransform: 'uppercase' }}>Pickups</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1D4ED8' }}>{pickupsCount} Tasks</div>
+            <div className="text-[10px] font-extrabold text-sky-700 uppercase tracking-wider">Pickups</div>
+            <div className="text-base font-extrabold text-sky-900">{pickupsCount} Tasks</div>
           </div>
         </div>
-        <div style={{ flex: 1, padding: '10px 12px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Truck size={15} style={{ color: '#10B981' }} />
+
+        <div className="p-3.5 bg-emerald-50/80 border border-emerald-100 rounded-2xl flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+            <Truck size={18} />
+          </div>
           <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4B5563', textTransform: 'uppercase' }}>Deliveries</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#047857' }}>{deliveriesCount} Tasks</div>
+            <div className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider">Deliveries</div>
+            <div className="text-base font-extrabold text-emerald-900">{deliveriesCount} Tasks</div>
           </div>
         </div>
       </div>
 
       {jobs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'var(--white)', borderRadius: 20, border: '1px solid var(--border-light)', boxShadow: 'var(--card-shadow)' }}>
-          <ShoppingBag size={36} style={{ color: '#E0A86B', marginBottom: 12, opacity: 0.6 }} />
-          <div style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.05rem' }}>All Clear!</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500 }}>No jobs assigned for you today.</div>
+        <div className="text-center py-14 px-4 bg-white rounded-3xl border border-slate-200/80 shadow-xs space-y-2">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+            <ShoppingBag size={28} />
+          </div>
+          <div className="text-lg font-extrabold text-slate-900">All Clear!</div>
+          <p className="text-xs font-medium text-slate-500">No jobs assigned for you today.</p>
         </div>
       ) : (
         jobs.map(job => {
@@ -91,59 +62,51 @@ export default function JobList({
           return (
             <div 
               key={job.id} 
-              className="partner-job-card"
-              style={{
-                borderLeft: isDelivery ? '4px solid #10B981' : '4px solid #E0A86B'
-              }}
+              className={`bg-white border rounded-3xl p-5 shadow-xs transition-all ${
+                isDelivery ? 'border-l-4 border-l-emerald-500 border-slate-200/80' : 'border-l-4 border-l-amber-500 border-slate-200/80'
+              }`}
             >
               {/* Header inside Job Card */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-dark)' }}>Order #{job.id}</span>
-                <span 
-                  style={{
-                    backgroundColor: isDelivery ? 'rgba(16, 185, 129, 0.08)' : 'rgba(224, 168, 107, 0.08)',
-                    color: isDelivery ? '#10B981' : '#E0A86B',
-                    padding: '4px 10px',
-                    borderRadius: '8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4
-                  }}
-                >
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+                <span className="text-sm font-extrabold text-slate-900">Order #{job.id}</span>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-extrabold rounded-lg ${
+                  isDelivery ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                }`}>
                   {isDelivery ? <Truck size={12} /> : <ShoppingBag size={12} />}
                   <span>{isDelivery ? 'DELIVERY' : 'COLLECTION'}</span>
                 </span>
               </div>
 
-              {/* Customer details */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <User size={14} style={{ color: 'var(--text-muted)' }} />
-                  <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>{job.customerNameSnapshot || job.customer?.name}</span>
+              {/* Customer Details */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm">
+                  <User size={15} className="text-slate-400" />
+                  <span>{job.customerNameSnapshot || job.customer?.name}</span>
                 </div>
                 
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
-                  <MapPin size={14} style={{ color: 'var(--text-muted)', marginTop: 2, flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.4, fontWeight: 500 }}>{job.pickupAddress || job.customer?.address}</span>
+                <div className="flex items-start gap-2 text-xs font-semibold text-slate-600">
+                  <MapPin size={15} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                  <span>{job.pickupAddress || job.customer?.address}</span>
                 </div>
 
                 {(job.pickupLandmark || job.customer?.landmark) && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 20 }}>
-                    <Navigation size={10} style={{ color: '#E0A86B' }} />
-                    <span style={{ fontSize: '0.75rem', color: '#D97706', fontWeight: 600 }}>LM: {job.pickupLandmark || job.customer?.landmark}</span>
+                  <div className="flex items-center gap-1.5 pl-6 text-xs font-bold text-amber-700">
+                    <Navigation size={12} className="text-amber-500" />
+                    <span>LM: {job.pickupLandmark || job.customer?.landmark}</span>
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 10, borderTop: '1px dashed rgba(224, 168, 107, 0.1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Clock size={12} style={{ color: 'var(--text-muted)' }} />
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>{job.pickupSlot || 'Anytime'}</span>
+                <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <Clock size={13} className="text-slate-400" />
+                    <span>{job.pickupSlot || 'Anytime'}</span>
                   </div>
                   
-                  <a href={`tel:${job.customerPhone || job.customer?.phone}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, color: '#3B82F6', fontSize: '0.78rem', fontWeight: 700 }}>
-                    <Phone size={12} />
+                  <a 
+                    href={`tel:${job.customerPhone || job.customer?.phone}`} 
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700"
+                  >
+                    <Phone size={13} />
                     <span>Call Customer</span>
                   </a>
                 </div>
@@ -152,8 +115,7 @@ export default function JobList({
               {/* Actions Button */}
               {isDelivery ? (
                 <button 
-                  className="btn-mobile btn-mobile-primary"
-                  style={{ minHeight: 46, padding: '10px 14px', fontSize: '0.88rem', backgroundColor: '#10B981', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   onClick={() => {
                     setActiveJob(job);
                     setWorkflowStep('delivery_details');
@@ -164,8 +126,7 @@ export default function JobList({
                 </button>
               ) : (
                 <button 
-                  className="btn-mobile btn-mobile-primary"
-                  style={{ minHeight: 46, padding: '10px 14px', fontSize: '0.88rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}
+                  className="w-full py-3 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-extrabold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   onClick={() => {
                     setActiveJob(job);
                     setWorkflowStep('details');

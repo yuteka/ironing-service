@@ -98,57 +98,50 @@ export default function Partners({
   const leaveCount = partners.filter(p => !p.active).length;
 
   return (
-    <div>
-      <style>{`
-        @keyframes slideOutDrawer {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .partner-card {
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .partner-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
-          border-color: rgba(14, 165, 233, 0.3) !important;
-        }
-      `}</style>
-
+    <div className="w-full space-y-6">
       {/* Page Header */}
-      <header className="page-header" style={{ position: 'relative', zIndex: 100, marginBottom: 26 }}>
-        <div className="page-title-group">
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#1f2937', letterSpacing: '-0.01em', margin: 0 }}>
-            Delivery & Pickup Partners
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4, fontWeight: 400 }}>
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4 relative z-10">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Delivery & Pickup Partners</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
             Configure partner logs, monitor active fleet service state, and manage leave shifts.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div className="flex items-center gap-3">
           {isAdmin && (
-            <button className="btn btn-primary" onClick={() => setDrawerOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button 
+              onClick={() => setDrawerOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
+            >
               <UserPlus size={16} />
               <span>Add Partner</span>
             </button>
           )}
-          <div style={{ position: 'relative' }}>
-            <button className="btn btn-secondary" onClick={() => setShowExportMenu(!showExportMenu)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="relative">
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm rounded-xl border border-slate-200 shadow-xs transition-all cursor-pointer"
+            >
               <Download size={16} />
               <span>Export</span>
               <ChevronDown size={14} />
             </button>
             
             {showExportMenu && (
-              <div style={{ position: 'absolute', top: '110%', right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', width: 160 }}>
-                <button onClick={() => { handleExportExcel(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
-                  <FileText size={16} style={{ color: '#10b981' }}/> Excel (CSV)
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                <button 
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => { handleExportExcel(); setShowExportMenu(false); }}
+                >
+                  <FileText size={16} className="text-emerald-600" />
+                  <span>Export to Excel (.xlsx)</span>
                 </button>
-                <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
-                  <FileText size={16} style={{ color: '#ef4444' }}/> PDF Report
+                <button 
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => { handleExportPDF(); setShowExportMenu(false); }}
+                >
+                  <FileText size={16} className="text-red-500" />
+                  <span>Export to PDF (.pdf)</span>
                 </button>
               </div>
             )}
@@ -156,22 +149,17 @@ export default function Partners({
         </div>
       </header>
 
-
-
       {/* Search Bar & Filters */}
-      <div className="data-card" style={{ padding: '14px 20px', marginBottom: 28, overflow: 'visible', zIndex: 20 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: 'var(--bg-slate)', border: '1px solid var(--border-light)', padding: '8px 16px', borderRadius: '10px', flex: 1, maxWidth: 400 }}>
-            <Search size={16} style={{ color: 'var(--text-muted)' }} />
-            <input 
-              type="text" 
-              placeholder="Search partners by name, username, or phone..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)' }}
-            />
-          </div>
-
+      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-xs">
+        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-xl max-w-md">
+          <Search size={16} className="text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search partners by name, username, or phone..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="bg-transparent border-none outline-none w-full text-sm font-bold text-slate-900 placeholder:text-slate-400"
+          />
         </div>
       </div>
 

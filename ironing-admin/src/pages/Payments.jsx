@@ -3,7 +3,7 @@ import { Search, Download, RefreshCw, DollarSign, Receipt, CreditCard, Activity,
 import { exportToExcel, exportToPDF } from '../utils/exportUtils';
 import { formatPhone } from '../utils/formatPhone';
 
-export default function Payments({ payments, orders = [], loading, loadAllData, gstPercentage = 5.0, setSelectedOrder }) {
+export default function Payments({ payments, orders = [], loading, loadAllData, gstPercentage = 5.0, setSelectedOrder, API_BASE }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -34,6 +34,13 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
   const fmtBookingId = (id) => `BK2026${String(id).padStart(4, '0')}`;
   const fmtInvId   = (id) => `INV2026${String(id).padStart(4, '0')}`;
   const fmtCustId  = (phone) => `CUS${String(phone).slice(-4)}`;
+
+  const getApiBase = () => {
+    if (typeof API_BASE !== 'undefined' && API_BASE) return API_BASE;
+    return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? `http://${window.location.hostname}:3000/api`
+      : 'https://ironing-service.onrender.com/api';
+  };
 
   // Filter & Search Logic for Invoices (Orders)
   const filteredInvoices = orders.filter(o => {
@@ -484,7 +491,7 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                                     minHeight: 'auto'
                                   }} 
                                   onClick={() => {
-                                    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                                    const currentApiBase = getApiBase();
                                     window.open(`${currentApiBase}/orders/${o.id}/invoice`, '_blank');
                                   }}
                                   title="Download Invoice"
@@ -741,7 +748,7 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                   </div>
                   
                   {(() => {
-                    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                    const currentApiBase = getApiBase();
                     const realRzpLink = selectedPaymentOrder.paymentLink || selectedPaymentOrder.razorpayPaymentLink || `${currentApiBase.replace(/\/api$/, '')}/pay/${selectedPaymentOrder.id}`;
                     return (
                       <>
@@ -804,7 +811,7 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {/* Share Tax Invoice Button */}
                   {(() => {
-                    const currentApiBase = API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? `http://${window.location.hostname}:3000/api` : 'https://ironing-service.onrender.com/api');
+                    const currentApiBase = getApiBase();
                     const invoiceUrl = `${currentApiBase.replace(/\/api$/, '')}/invoice/${selectedPaymentOrder.id}`;
                     return (
                       <>

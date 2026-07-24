@@ -843,6 +843,7 @@ export default function App() {
             loadAllData={loadAllData} 
             gstPercentage={settings?.gstPercentage || 5.0}
             setSelectedOrder={setSelectedOrder}
+            API_BASE={API_BASE}
           />
         )}
 

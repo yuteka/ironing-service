@@ -77,146 +77,133 @@ export default function OrderDrawer({
     : null;
 
   return (
-    <div className="drawer-overlay" onClick={() => setSelectedOrder(null)}>
-      <div className="drawer-content" onClick={e => e.stopPropagation()}>
-        <div className="drawer-header">
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Booking Detail: BK2026{String(selectedOrder.id).padStart(4, '0')}</h3>
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex justify-end animate-in fade-in duration-200" onClick={() => setSelectedOrder(null)}>
+      <div className="w-full max-w-lg h-full bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300" onClick={e => e.stopPropagation()}>
+        {/* Drawer Header */}
+        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+          <h3 className="text-lg font-extrabold text-slate-900">
+            Booking Detail: BK2026{String(selectedOrder.id).padStart(4, '0')}
+          </h3>
           <button 
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors cursor-pointer"
             onClick={() => setSelectedOrder(null)}
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="drawer-body">
-          <div style={{ marginBottom: 24 }}>
-            <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
+        {/* Drawer Body */}
+        <div className="p-6 flex-1 overflow-y-auto space-y-6">
+          {/* Customer Information */}
+          <div className="space-y-3">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Customer Information
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
-              {/* Profile Block */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, backgroundColor: 'var(--bg-slate)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border-light)' }}>
-                <div style={{ width: 46, height: 46, borderRadius: '50%', background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem', textTransform: 'uppercase', boxShadow: '0 2px 8px rgba(59,130,246,0.3)' }}>
-                  {selectedOrder.customerNameSnapshot ? String(selectedOrder.customerNameSnapshot).charAt(0) : 'U'}
+            
+            <div className="flex items-center gap-3.5 bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-sky-600 to-blue-500 text-white flex items-center justify-center font-extrabold text-lg uppercase shadow-xs">
+                {selectedOrder.customerNameSnapshot ? String(selectedOrder.customerNameSnapshot).charAt(0) : 'U'}
+              </div>
+              <div className="flex-1">
+                <div className="font-extrabold text-base text-slate-900 leading-tight">
+                  {selectedOrder.customerNameSnapshot || 'Unknown'}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#0F172A', marginBottom: 2 }}>{selectedOrder.customerNameSnapshot || 'Unknown'}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#0284c7', background: '#e0f2fe', padding: '2px 8px', borderRadius: 12, display: 'inline-block', fontWeight: 600, border: '1px solid #bae6fd' }}>
-                    {selectedOrder.customer?.customerId ? String(selectedOrder.customer.customerId).replace('-', '') : `CUS${String(selectedOrder.customerPhone || selectedOrder.customer?.phone || '0000').slice(-4)}`}
-                  </div>
+                <div className="inline-block mt-0.5 px-2 py-0.5 text-[11px] font-bold text-sky-700 bg-sky-100/80 border border-sky-200 rounded-md">
+                  {selectedOrder.customer?.customerId ? String(selectedOrder.customer.customerId).replace('-', '') : `CUS${String(selectedOrder.customerPhone || selectedOrder.customer?.phone || '0000').slice(-4)}`}
                 </div>
               </div>
+            </div>
 
-              {/* Contact Info Block */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem', color: 'var(--text-muted)' }}>
-                  <Phone size={15} style={{ color: '#0ea5e9' }} />
-                  <span style={{ fontWeight: 600, color: '#334155' }}>
-                    {formatPhone(selectedOrder.customerPhone || selectedOrder.customer?.phone)}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'start', gap: 8, fontSize: '0.95rem', color: 'var(--text-muted)' }}>
-                  <MapPin size={15} style={{ color: '#0ea5e9', marginTop: 3, flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#334155' }}>{selectedOrder.pickupAddress || 'No Address Provided'}</div>
-                    {selectedOrder.pickupLandmark && (
-                      <div style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: 2, color: '#94a3b8' }}>
-                        Landmark: {selectedOrder.pickupLandmark}
-                      </div>
-                    )}
-                  </div>
+            <div className="space-y-2 px-1">
+              <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
+                <Phone size={15} className="text-sky-500" />
+                <span>{formatPhone(selectedOrder.customerPhone || selectedOrder.customer?.phone)}</span>
+              </div>
+              <div className="flex items-start gap-2.5 text-sm font-semibold text-slate-700">
+                <MapPin size={15} className="text-sky-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div>{selectedOrder.pickupAddress || 'No Address Provided'}</div>
+                  {selectedOrder.pickupLandmark && (
+                    <div className="text-xs text-slate-400 italic font-medium mt-0.5">
+                      Landmark: {selectedOrder.pickupLandmark}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0' }}>
-            <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          {/* Order Status Progression */}
+          <div className="pt-5 border-t border-slate-200 space-y-4">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Order Status Progression
             </div>
-            <div style={{ marginTop: 12 }}>
-              <div className="form-group">
-                {isProcessingPhase ? (
-                  <div style={{ marginBottom: 16, padding: '16px', backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8 }}>
-                    <div style={{ fontSize: '0.85rem', color: '#1E3A8A', fontWeight: 700, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <AlertTriangle size={16} /> Ready Checklist (Item Count Confirmation)
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#1E40AF', marginBottom: 12 }}>
-                      Please verify the billing items and total below. Once verified, manually mark the order as ready. Then you can allocate a delivery partner.
-                    </div>
-                    <button 
-                      className="btn btn-primary" 
-                      style={{ width: '100%' }}
-                      onClick={() => updateOrderStatus(selectedOrder.id, 'READY')}
-                    >
-                      Confirm Item Count & Mark Ready
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <label className="form-label" style={{ fontSize: '0.8rem' }}>
-                      {isDeliveryPhase ? 'Allocate Delivery Partner' : 'Allocate Pickup Partner'}
-                    </label>
-                    <select 
-                      className="form-input"
-                      value={selectedOrder.partner?.id || selectedOrder.partnerId || ''}
-                      onChange={e => assignPartner(selectedOrder.id, e.target.value)}
-                      disabled={['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status)}
-                      style={{
-                        backgroundColor: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '#F1F5F9' : '#FFFFFF',
-                        color: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '#64748B' : '#0F172A',
-                        fontWeight: 700,
-                        border: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '1px solid #CBD5E1' : '2px solid #0284c7',
-                        cursor: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      <option value="">-- Choose Partner --</option>
-                      {partners.filter(p => p.active && !(selectedOrder.status === 'REASSIGNMENT_NEEDED' && selectedOrder.clothCheckNote && selectedOrder.clothCheckNote.includes(p.name))).map(p => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} ({getPartnerActiveCount(p.id)} active jobs)
-                        </option>
-                      ))}
-                    </select>
-                    {selectedOrder.status === 'REASSIGNMENT_NEEDED' && (selectedOrder.partnerReleaseNote || selectedOrder.clothCheckNote) && (
-                      <div style={{ marginTop: 8, fontSize: '0.75rem', color: '#DC2626', backgroundColor: '#FEF2F2', padding: '6px 10px', borderRadius: 6, border: '1px solid #FECACA' }}>
-                        <strong>Reason:</strong> {selectedOrder.partnerReleaseNote || selectedOrder.clothCheckNote}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
 
-              <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0F172A' }}>Set Progress Status</label>
+            <div className="space-y-4">
+              {isProcessingPhase ? (
+                <div className="p-4 bg-sky-50 border border-sky-200 rounded-2xl space-y-3">
+                  <div className="text-xs font-bold text-sky-900 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-sky-600" />
+                    <span>Ready Checklist (Item Count Confirmation)</span>
+                  </div>
+                  <p className="text-xs text-sky-700 font-medium">
+                    Please verify the billing items and total below. Once verified, manually mark the order as ready. Then you can allocate a delivery partner.
+                  </p>
+                  <button 
+                    className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                    onClick={() => updateOrderStatus(selectedOrder.id, 'READY')}
+                  >
+                    Confirm Item Count & Mark Ready
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700">
+                    {isDeliveryPhase ? 'Allocate Delivery Partner' : 'Allocate Pickup Partner'}
+                  </label>
+                  <select 
+                    className={`w-full px-3.5 py-2.5 rounded-xl font-bold text-sm outline-none transition-all ${
+                      ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status)
+                        ? 'bg-slate-100 text-slate-500 border border-slate-300 cursor-not-allowed opacity-75'
+                        : 'bg-white text-slate-900 border-2 border-sky-500 focus:ring-2 focus:ring-sky-200 cursor-pointer'
+                    }`}
+                    value={selectedOrder.partner?.id || selectedOrder.partnerId || ''}
+                    onChange={e => assignPartner(selectedOrder.id, e.target.value)}
+                    disabled={['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status)}
+                  >
+                    <option value="">-- Choose Partner --</option>
+                    {partners.filter(p => p.active && !(selectedOrder.status === 'REASSIGNMENT_NEEDED' && selectedOrder.clothCheckNote && selectedOrder.clothCheckNote.includes(p.name))).map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({getPartnerActiveCount(p.id)} active jobs)
+                      </option>
+                    ))}
+                  </select>
+                  {selectedOrder.status === 'REASSIGNMENT_NEEDED' && (selectedOrder.partnerReleaseNote || selectedOrder.clothCheckNote) && (
+                    <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
+                      <strong>Reason:</strong> {selectedOrder.partnerReleaseNote || selectedOrder.clothCheckNote}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-900">Set Progress Status</label>
                 {['DELIVERED', 'CANCELLED'].includes(selectedOrder.status?.toUpperCase()) ? (
-                  <div style={{
-                    padding: '12px 16px', borderRadius: 10, fontWeight: 800, fontSize: '0.9rem',
-                    backgroundColor: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#ECFDF5' : '#FEF2F2',
-                    color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#047857' : '#B91C1C',
-                    border: `2px solid ${selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#34D399' : '#F87171'}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-                  }}>
+                  <div className={`p-3.5 rounded-xl font-extrabold text-sm border flex items-center justify-between ${
+                    selectedOrder.status?.toUpperCase() === 'DELIVERED'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                      : 'bg-red-50 text-red-800 border-red-300'
+                  }`}>
                     <span>{statusLabels[selectedOrder.status?.toUpperCase()] || selectedOrder.status}</span>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#065F46' : '#991B1B' }}>
+                    <span className="text-xs font-extrabold">
                       {selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '✓ Order Delivered (Locked)' : '✕ Order Cancelled (Locked)'}
                     </span>
                   </div>
                 ) : (
                   <select 
-                    className="form-input"
+                    className="w-full px-3.5 py-2.5 bg-white text-slate-900 border-2 border-sky-500 rounded-xl font-extrabold text-sm cursor-pointer outline-none focus:ring-2 focus:ring-sky-200"
                     value={selectedOrder.status?.toUpperCase()}
                     onChange={e => updateOrderStatus(selectedOrder.id, e.target.value)}
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      color: '#0F172A',
-                      fontWeight: 800,
-                      fontSize: '0.92rem',
-                      border: '2px solid #0284c7',
-                      borderRadius: 10,
-                      padding: '10px 14px',
-                      cursor: 'pointer'
-                    }}
                   >
                     {Object.keys(statusLabels)
                       .filter(st => st !== 'CANCELLED' || selectedOrder.status?.toUpperCase() === 'CANCELLED')
@@ -227,11 +214,7 @@ export default function OrderDrawer({
                             key={st} 
                             value={st} 
                             disabled={!isCurrent}
-                            style={{
-                              color: isCurrent ? '#0F172A' : '#94A3B8',
-                              backgroundColor: isCurrent ? '#E0F2FE' : '#F8FAFC',
-                              fontWeight: isCurrent ? 800 : 500
-                            }}
+                            className={isCurrent ? 'font-bold text-slate-900 bg-sky-50' : 'font-normal text-slate-400 bg-slate-50'}
                           >
                             {statusLabels[st]} {isCurrent ? ' (Active)' : ' (Locked)'}
                           </option>
@@ -243,187 +226,39 @@ export default function OrderDrawer({
             </div>
           </div>
 
-
-
-          <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0' }}>
-            <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 8 }}>
+          {/* Billing Details */}
+          <div className="pt-5 border-t border-slate-200 space-y-3">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Billing details
             </div>
-            
-            {selectedOrder.items && selectedOrder.items.length > 0 ? (
-              <div>
-                <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse', marginBottom: 12 }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>
-                      <th style={{ textAlign: 'left', paddingBottom: 6 }}>Item</th>
-                      <th style={{ textAlign: 'center', paddingBottom: 6 }}>Qty</th>
-                      <th style={{ textAlign: 'right', paddingBottom: 6 }}>Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedOrder.items.map(item => (
-                      <tr key={item.id} style={{ borderBottom: '1px dotted var(--border-light)' }}>
-                        <td style={{ padding: '6px 0' }}>
-                          <div>{item.itemType}</div>
-                          {item.note && (
-                            <div style={{ fontSize: '0.75rem', color: '#b45309', fontWeight: 600, marginTop: 2 }}>
-                              ⚠️ Note: {item.note}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'center', padding: '6px 0' }}>{item.quantity}</td>
-                        <td style={{ textAlign: 'right', padding: '6px 0' }}>₹{item.subtotal}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '1rem', marginTop: 12 }}>
-                  <span>Bill Total:</span>
-                  <span>₹{selectedOrder.totalAmount}</span>
-                </div>
 
-                <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                  <span className={`badge ${selectedOrder.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-pending'}`}>
-                    Payment: {selectedOrder.paymentStatus}
-                  </span>
-                  {selectedOrder.paymentMethod && (
-                    <span className="badge badge-assigned">
-                      Via: {selectedOrder.paymentMethod}
-                    </span>
-                  )}
-                </div>
-
-                {selectedOrder.items && selectedOrder.items.length > 0 && (
-                  <div style={{ marginTop: 20 }}>
-                    <a 
-                      href={isMockMode ? '#' : `${API_BASE}/orders/${selectedOrder.id}/invoice?token=${token}`}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="btn btn-secondary"
-                      style={{ width: '100%', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      onClick={(e) => {
-                        if (isMockMode) {
-                          e.preventDefault();
-                          alert('[Mock Mode] Invoice download mock triggered. In live mode, this returns the compiled PDF Kit invoice.');
-                        }
-                      }}
-                    >
-                      Download PDF Invoice
-                    </a>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+              <div className="space-y-2 divide-y divide-slate-200/60">
+                {(selectedOrder.items || []).map((item, idx) => (
+                  <div key={idx} className="pt-2 first:pt-0 flex items-center justify-between text-xs font-semibold text-slate-700">
+                    <span>{item.quantity}x {item.itemType}</span>
+                    <span className="font-bold text-slate-900">₹{(item.rate * item.quantity).toFixed(2)}</span>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                Cloth checking and counting has not been done yet by the partner.
-              </div>
-            )}
-          </div>
-
-          {/* Premium Order Timeline Tracking */}
-          <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0' }}>
-            <div className="form-label" style={{ textTransform: 'uppercase', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-              Order Timeline & Audit Log
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', paddingLeft: 20 }}>
-              {/* Visual line */}
-              <div style={{
-                position: 'absolute',
-                left: 6,
-                top: 4,
-                bottom: 4,
-                width: 2,
-                background: 'linear-gradient(to bottom, #e2e8f0, #f1f5f9)'
-              }} />
-
-              {/* Step 1: Created */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: '#0284c7', border: '3px solid #ffffff', boxShadow: '0 0 0 2px #0284c7' }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F172A' }}>Order Placed</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                ))}
               </div>
 
-              {/* Step 2: Pickup Assigned */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: selectedOrder.assignedPickupAt ? '#0ea5e9' : '#e2e8f0', border: '3px solid #ffffff', boxShadow: `0 0 0 2px ${selectedOrder.assignedPickupAt ? '#0ea5e9' : '#e2e8f0'}` }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedOrder.assignedPickupAt ? '#0F172A' : '#94a3b8' }}>Pickup Assigned</span>
-                {selectedOrder.assignedPickupAt ? (
-                  <>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Partner: <strong style={{ color: '#0F172A' }}>{selectedOrder.partner?.name || 'N/A'}</strong></span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.assignedPickupAt).toLocaleString()}</span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Pending</span>
-                )}
-              </div>
-
-              {/* Step 3: Collected */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: selectedOrder.pickedAt ? '#6366f1' : '#e2e8f0', border: '3px solid #ffffff', boxShadow: `0 0 0 2px ${selectedOrder.pickedAt ? '#6366f1' : '#e2e8f0'}` }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedOrder.pickedAt ? '#0F172A' : '#94a3b8' }}>Clothes Collected</span>
-                {selectedOrder.pickedAt ? (
-                  <>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Collected by: <strong style={{ color: '#0F172A' }}>{selectedOrder.Partner_Order_pickedByPartnerIdToPartner?.name || selectedOrder.partner?.name || 'N/A'}</strong></span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.pickedAt).toLocaleString()}</span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Pending</span>
-                )}
-              </div>
-
-              {/* Step 4: Ready */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: selectedOrder.readyAt ? '#f59e0b' : '#e2e8f0', border: '3px solid #ffffff', boxShadow: `0 0 0 2px ${selectedOrder.readyAt ? '#f59e0b' : '#e2e8f0'}` }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedOrder.readyAt ? '#0F172A' : '#94a3b8' }}>Ironing Completed (Ready)</span>
-                {selectedOrder.readyAt ? (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.readyAt).toLocaleString()}</span>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Pending</span>
-                )}
-              </div>
-
-              {/* Step 5: Out for Delivery */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: selectedOrder.assignedDeliveryAt ? '#10b981' : '#e2e8f0', border: '3px solid #ffffff', boxShadow: `0 0 0 2px ${selectedOrder.assignedDeliveryAt ? '#10b981' : '#e2e8f0'}` }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedOrder.assignedDeliveryAt ? '#0F172A' : '#94a3b8' }}>Out for Delivery</span>
-                {selectedOrder.assignedDeliveryAt ? (
-                  <>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Delivery Partner: <strong style={{ color: '#0F172A' }}>{selectedOrder.partner?.name || 'N/A'}</strong></span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.assignedDeliveryAt).toLocaleString()}</span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Pending</span>
-                )}
-              </div>
-
-              {/* Step 6: Delivered */}
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <div style={{ position: 'absolute', left: -20, top: 4, width: 14, height: 14, borderRadius: '50%', background: selectedOrder.deliveredAt ? '#059669' : '#e2e8f0', border: '3px solid #ffffff', boxShadow: `0 0 0 2px ${selectedOrder.deliveredAt ? '#059669' : '#e2e8f0'}` }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: selectedOrder.deliveredAt ? '#059669' : '#94a3b8' }}>Delivered Successfully {selectedOrder.deliveredAt && '✓'}</span>
-                {selectedOrder.deliveredAt ? (
-                  <>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Delivered by: <strong style={{ color: '#0F172A' }}>{selectedOrder.Partner_Order_deliveredByPartnerIdToPartner?.name || selectedOrder.partner?.name || 'N/A'}</strong></span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(selectedOrder.deliveredAt).toLocaleString()}</span>
-                  </>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>Pending</span>
-                )}
+              <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-sm font-extrabold text-slate-900">
+                <span>Total Amount</span>
+                <span className="text-sky-600 text-base">₹{parseFloat(selectedOrder.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>
 
+          {/* Cancel Order Action */}
           {role === 'admin' && selectedOrder.status !== 'Cancelled' && selectedOrder.status !== 'Delivered' && (
-            <div style={{ borderTop: '1px solid var(--border-light)', padding: '20px 0', marginTop: 10 }}>
+            <div className="pt-5 border-t border-slate-200">
               {!showCancelConfirm ? (
                 <button 
-                  className="btn btn-danger" 
-                  style={{ 
-                    width: '100%',
-                    opacity: selectedOrder.status.toLowerCase() !== 'confirmed' ? 0.5 : 1,
-                    cursor: selectedOrder.status.toLowerCase() !== 'confirmed' ? 'not-allowed' : 'pointer'
-                  }}
+                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-xs transition-all ${
+                    selectedOrder.status.toLowerCase() !== 'confirmed'
+                      ? 'bg-slate-300 cursor-not-allowed opacity-60'
+                      : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                  }`}
                   disabled={selectedOrder.status.toLowerCase() !== 'confirmed'}
                   onClick={() => setShowCancelConfirm(true)}
                   title={selectedOrder.status.toLowerCase() !== 'confirmed' ? "Cancellation disabled after partner is assigned" : ""}
@@ -431,15 +266,14 @@ export default function OrderDrawer({
                   Cancel Order
                 </button>
               ) : (
-                <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', padding: 14, borderRadius: 10 }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#991B1B', marginBottom: 10, lineHeight: 1.4, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                    <AlertTriangle size={16} style={{ color: '#EF4444', flexShrink: 0, marginTop: 1 }} />
+                <div className="p-4 bg-red-50 border border-red-200 rounded-2xl space-y-3">
+                  <div className="text-xs font-bold text-red-800 flex items-start gap-2 leading-snug">
+                    <AlertTriangle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
                     <span>Are you sure you want to cancel Order #{selectedOrder.id}? This will notify the customer via WhatsApp and release any assigned partners.</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
+                  <div className="flex gap-2">
                     <button 
-                      className="btn btn-danger" 
-                      style={{ flex: 1, minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem' }}
+                      className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
                       onClick={() => {
                         cancelOrder(selectedOrder.id);
                         setShowCancelConfirm(false);
@@ -448,8 +282,7 @@ export default function OrderDrawer({
                       Yes, Cancel
                     </button>
                     <button 
-                      className="btn btn-secondary" 
-                      style={{ flex: 1, minHeight: '34px', padding: '6px 12px', fontSize: '0.8rem' }}
+                      className="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer"
                       onClick={() => setShowCancelConfirm(false)}
                     >
                       No, Keep

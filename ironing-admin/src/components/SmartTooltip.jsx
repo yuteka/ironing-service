@@ -33,76 +33,34 @@ export default function SmartTooltip({ text, style = {}, className = '', icon = 
     }
   }, [showTooltip, hide]);
 
-  if (!text) return <span style={{ color: '#94a3b8' }}>-</span>;
+  if (!text) return <span className="text-slate-400">-</span>;
 
   return (
     <>
       <span
         ref={textRef}
-        className={className}
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          display: 'block',
-          cursor: 'default',
-          ...style,
-        }}
+        className={`truncate block cursor-default ${className}`}
+        style={style}
         onMouseEnter={checkAndShow}
         onMouseLeave={hide}
       >
-        {icon && <span style={{ marginRight: 4, verticalAlign: 'middle', display: 'inline-block' }}>{icon}</span>}
+        {icon && <span className="mr-1 inline-block align-middle">{icon}</span>}
         {text}
       </span>
 
       {showTooltip && createPortal(
         <div
+          className="fixed z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-100"
           style={{
-            position: 'fixed',
             left: coords.x,
             top: coords.y - 8,
             transform: 'translate(-50%, -100%)',
-            zIndex: 99999,
-            pointerEvents: 'none',
-            animation: 'tooltipFadeIn 0.12s ease-out',
           }}
         >
-          <style>{`
-            @keyframes tooltipFadeIn {
-              from { opacity: 0; transform: translate(-50%, -95%); }
-              to   { opacity: 1; transform: translate(-50%, -100%); }
-            }
-          `}</style>
           {/* Arrow */}
-          <div style={{
-            position: 'absolute',
-            bottom: -6,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 0,
-            height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: '6px solid rgba(15,23,42,0.95)',
-          }} />
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-x-6 border-x-transparent border-t-6 border-t-slate-900" />
           {/* Bubble */}
-          <div style={{
-            background: 'rgba(15,23,42,0.95)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 8,
-            padding: '6px 12px',
-            color: '#ffffff',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            width: 'max-content',
-            maxWidth: 260,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            letterSpacing: '0.01em',
-            lineHeight: 1.3,
-            textAlign: 'center',
-          }}>
+          <div className="bg-slate-900/95 border border-slate-700/50 rounded-xl px-3 py-1.5 text-white text-xs font-bold whitespace-normal break-words max-w-xs shadow-xl text-center leading-snug">
             {text}
           </div>
         </div>,

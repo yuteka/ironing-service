@@ -19,82 +19,40 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
   const selectedOption = options.find(opt => opt.value === value) || options[0];
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width, minWidth }}>
+    <div ref={containerRef} className="relative inline-block" style={{ width, minWidth }}>
       <button 
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          width: '100%', 
-          padding: '8px 14px', 
-          fontSize: '0.85rem', 
-          fontWeight: 600, 
-          color: '#334155', 
-          backgroundColor: 'rgba(255,255,255,0.9)', 
-          border: '1px solid #e2e8f0', 
-          borderRadius: '10px',
-          cursor: 'pointer',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.02)',
-          transition: 'all 0.2s ease',
-          gap: 8
-        }}
+        className="w-full flex items-center justify-between gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200/80 rounded-xl shadow-xs hover:border-slate-300 transition-all cursor-pointer outline-none"
       >
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span className="truncate">
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <ChevronDown size={14} style={{ color: '#94a3b8', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div style={{ 
-          position: 'absolute', 
-          top: 'calc(100% + 6px)', 
-          left: 0, 
-          width: '100%', 
-          minWidth: '100%',
-          backgroundColor: '#ffffff', 
-          border: '1px solid #e2e8f0', 
-          borderRadius: '12px', 
-          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)', 
-          zIndex: 9999, 
-          maxHeight: 220, 
-          overflowY: 'auto',
-          padding: '6px'
-        }}>
-          {options.map((opt) => (
-            <div 
-              key={opt.value}
-              onClick={() => {
-                onChange(opt.value);
-                setIsOpen(false);
-              }}
-              style={{
-                padding: '8px 12px',
-                fontSize: '0.85rem',
-                fontWeight: value === opt.value ? 700 : 500,
-                color: value === opt.value ? '#0f172a' : '#475569',
-                backgroundColor: value === opt.value ? '#f1f5f9' : 'transparent',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'background-color 0.15s',
-                marginBottom: 2
-              }}
-              onMouseEnter={(e) => {
-                if (value !== opt.value) e.currentTarget.style.backgroundColor = '#f8fafc';
-              }}
-              onMouseLeave={(e) => {
-                if (value !== opt.value) e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <span>{opt.label}</span>
-              {value === opt.value && <Check size={14} style={{ color: '#3b82f6' }} />}
-            </div>
-          ))}
+        <div className="absolute top-full left-0 mt-1.5 w-full min-w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-56 overflow-y-auto p-1.5 animate-in fade-in zoom-in-95 duration-150 space-y-0.5">
+          {options.map((opt) => {
+            const isSelected = value === opt.value;
+            return (
+              <div 
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`px-3 py-2 text-xs rounded-lg cursor-pointer flex items-center justify-between transition-colors ${
+                  isSelected 
+                    ? 'font-extrabold text-slate-900 bg-slate-100' 
+                    : 'font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <span>{opt.label}</span>
+                {isSelected && <Check size={14} className="text-sky-600" />}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

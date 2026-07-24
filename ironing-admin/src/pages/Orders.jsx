@@ -354,48 +354,45 @@ export default function Orders({ orders, setSelectedOrder, triggerBulkReady, par
       <div className="bg-orb bg-orb-purple"></div>
 
       {/* Page Header */}
-      <header className="page-header" style={{ marginBottom: 26, position: 'relative', zIndex: 100 }}>
-        <div className="page-title-group">
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#1f2937', letterSpacing: '-0.01em', margin: 0 }}>
-            Manage Bookings
-          </h1>
-          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: 4, fontWeight: 400 }}>
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4 mb-6 relative z-10">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Manage Bookings</h1>
+          <p className="text-sm font-medium text-slate-500 mt-1">
             Filter, assign, track, and export active customer laundry bookings.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {/* Bulk Ready Button Removed */}
-          
-          <div style={{ position: 'relative' }}>
+        <div className="flex items-center gap-3">
+          <div className="relative">
             <button 
-              className="btn btn-primary" 
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 8, 
-                padding: '10px 18px', 
-                fontSize: '0.85rem', 
-                fontWeight: 700, 
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-                border: 'none',
-                color: '#ffffff',
-                boxShadow: '0 4px 14px rgba(14, 165, 233, 0.25)'
-              }} 
               onClick={() => setShowExportMenu(!showExportMenu)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
-              <Download size={15} />
+              <Download size={16} />
               <span>Export Bookings</span>
               <ChevronDown size={14} />
             </button>
-            
+
             {showExportMenu && (
-              <div style={{ position: 'absolute', top: '110%', right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', width: 160 }}>
-                <button onClick={() => { handleExportExcel(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
-                  <FileText size={16} style={{ color: '#10b981' }}/> Excel (CSV)
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => {
+                    exportToExcel(filteredOrders, 'Active_Laundry_Bookings');
+                    setShowExportMenu(false);
+                  }}
+                >
+                  <FileText size={16} className="text-emerald-600" />
+                  <span>Export to Excel (.xlsx)</span>
                 </button>
-                <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} style={{ width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
-                  <FileText size={16} style={{ color: '#ef4444' }}/> PDF Report
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => {
+                    exportToPDF(filteredOrders, 'Active_Laundry_Bookings');
+                    setShowExportMenu(false);
+                  }}
+                >
+                  <FileText size={16} className="text-red-500" />
+                  <span>Export to PDF (.pdf)</span>
                 </button>
               </div>
             )}

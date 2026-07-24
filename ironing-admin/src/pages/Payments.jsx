@@ -466,8 +466,8 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                                   minHeight: 'auto',
                                   cursor: 'pointer'
                                 }} 
-                                onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
-                                title="Inspect Order Details"
+                                onClick={() => setSelectedPaymentOrder(o)}
+                                title="Inspect Payment Details"
                               >
                                 <Eye size={14} />
                               </button>
@@ -605,8 +605,37 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
         const custName = selectedPaymentOrder.customerNameSnapshot || 'Customer';
 
         return (
-          <div className="drawer-overlay" onClick={() => setSelectedPaymentOrder(null)}>
-            <div className="drawer-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, overflowY: 'auto', padding: '24px 28px' }}>
+          <div 
+            className="drawer-overlay" 
+            onClick={() => setSelectedPaymentOrder(null)}
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0, 
+              zIndex: 99999, 
+              background: 'rgba(15, 23, 42, 0.4)', 
+              backdropFilter: 'blur(4px)', 
+              display: 'flex', 
+              justifyContent: 'flex-end' 
+            }}
+          >
+            <div 
+              className="drawer-content" 
+              onClick={e => e.stopPropagation()} 
+              style={{ 
+                width: '100%', 
+                maxWidth: 500, 
+                background: '#FFFFFF', 
+                height: '100%', 
+                overflowY: 'auto', 
+                padding: '24px 28px', 
+                boxShadow: '-10px 0 40px rgba(0,0,0,0.2)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
               <div className="drawer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 18px 0', borderBottom: '1px solid var(--border-light)' }}>
                 <div>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>

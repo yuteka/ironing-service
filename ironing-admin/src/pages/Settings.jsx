@@ -398,34 +398,30 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
       </header>
 
       {/* Settings Navigation Bar */}
-      <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid var(--border-light)', marginBottom: 24, paddingBottom: 8 }}>
+      <div className="flex items-center gap-3 border-b border-slate-200 pb-3 mb-6">
         <button 
-          className={`btn ${activeSubTab === 'business' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ minHeight: 'auto', padding: '8px 16px', fontSize: '0.85rem' }}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeSubTab === 'business' ? 'bg-sky-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           onClick={() => handleTabChange('business')}
         >
           <Building size={16} />
           <span>Business details</span>
         </button>
         <button 
-          className={`btn ${activeSubTab === 'keys' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ minHeight: 'auto', padding: '8px 16px', fontSize: '0.85rem' }}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeSubTab === 'keys' ? 'bg-sky-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           onClick={() => handleTabChange('keys')}
         >
           <CreditCard size={16} />
           <span>Payments & WhatsApp Keys</span>
         </button>
         <button 
-          className={`btn ${activeSubTab === 'catalog' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ minHeight: 'auto', padding: '8px 16px', fontSize: '0.85rem' }}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeSubTab === 'catalog' ? 'bg-sky-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           onClick={() => handleTabChange('catalog')}
         >
           <Tag size={16} />
           <span>Price Catalog</span>
         </button>
         <button 
-          className={`btn ${activeSubTab === 'admins' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ minHeight: 'auto', padding: '8px 16px', fontSize: '0.85rem' }}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeSubTab === 'admins' ? 'bg-sky-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           onClick={() => handleTabChange('admins')}
         >
           <Shield size={16} />

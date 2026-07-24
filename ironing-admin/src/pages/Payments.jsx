@@ -372,12 +372,19 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                             <td style={{ fontWeight: 600, color: 'var(--text-muted)', paddingLeft: 14, paddingRight: 8 }}>{indexOfFirstInvoice + idx + 1}</td>
                             <td style={{ paddingTop: 10, paddingBottom: 10 }}>
                               {o.paymentStatus === 'Paid' ? (
-                                <span className="notranslate" translate="no" style={{ 
-                                  fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
-                                  color: '#7c3aed', 
-                                  fontWeight: 800,
-                                  fontSize: '0.72rem'
-                                }}>
+                                <span 
+                                  className="notranslate" 
+                                  translate="no" 
+                                  onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
+                                  style={{ 
+                                    fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
+                                    color: '#7c3aed', 
+                                    fontWeight: 800,
+                                    fontSize: '0.72rem',
+                                    cursor: 'pointer',
+                                    textDecoration: 'underline'
+                                  }}
+                                >
                                   {fmtInvId(o.id)}
                                 </span>
                               ) : (
@@ -385,12 +392,19 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                               )}
                             </td>
                             <td style={{ paddingTop: 10, paddingBottom: 10 }}>
-                              <span className="notranslate" translate="no" style={{ 
-                                fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
-                                color: '#0284c7', 
-                                fontWeight: 800,
-                                fontSize: '0.72rem'
-                              }}>
+                              <span 
+                                className="notranslate" 
+                                translate="no" 
+                                onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
+                                style={{ 
+                                  fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
+                                  color: '#0284c7', 
+                                  fontWeight: 800,
+                                  fontSize: '0.72rem',
+                                  cursor: 'pointer',
+                                  textDecoration: 'underline'
+                                }}
+                              >
                                 {fmtBookingId(o.id)}
                               </span>
                             </td>
@@ -449,10 +463,11 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                                   borderRadius: '6px', 
                                   display: 'inline-flex', 
                                   alignItems: 'center',
-                                  minHeight: 'auto'
+                                  minHeight: 'auto',
+                                  cursor: 'pointer'
                                 }} 
-                                onClick={() => setSelectedPaymentOrder(o)}
-                                title="Inspect Payment Details"
+                                onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
+                                title="Inspect Order Details"
                               >
                                 <Eye size={14} />
                               </button>

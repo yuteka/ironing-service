@@ -501,6 +501,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     placeholder="e.g. Ironing Service Ltd"
                     required
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -515,6 +523,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     pattern="[A-Z0-9]{15}"
                     title="Please enter a valid 15-character alphanumeric GSTIN."
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -528,6 +544,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     placeholder="e.g. 5.0"
                     required
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -543,6 +567,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     title="Please enter a valid 10-digit support phone number."
                     required
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -556,6 +588,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     placeholder="e.g. support@ironingservice.com"
                     required
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -563,7 +603,16 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                   <label className="form-label">Business Address</label>
                   <textarea 
                     className="form-input" 
-                    style={{ minHeight: '100px', resize: 'vertical' }}
+                    style={{ 
+                      minHeight: '100px', 
+                      resize: 'vertical',
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                     value={businessAddress}
                     onChange={e => setBusinessAddress(e.target.value)}
                     placeholder="Official address to print on receipts"
@@ -632,6 +681,14 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     onChange={e => handleKeyChange(e.target.value, setRazorpayKeyId)}
                     placeholder="rzp_test_..."
                     disabled={!isEditing}
+                    style={{
+                      backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                      color: !isEditing ? '#64748B' : '#0F172A',
+                      border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                      cursor: !isEditing ? 'not-allowed' : 'text',
+                      opacity: !isEditing ? 0.75 : 1,
+                      fontWeight: !isEditing ? 600 : 700
+                    }}
                   />
                 </div>
 
@@ -641,7 +698,15 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     <input 
                       type={showKeySecret ? "text" : "password"} 
                       className="form-input" 
-                      style={{ paddingRight: '40px' }}
+                      style={{ 
+                        paddingRight: '40px',
+                        backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                        color: !isEditing ? '#64748B' : '#0F172A',
+                        border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                        cursor: !isEditing ? 'not-allowed' : 'text',
+                        opacity: !isEditing ? 0.75 : 1,
+                        fontWeight: !isEditing ? 600 : 700
+                      }}
                       value={razorpayKeySecret}
                       onChange={e => handleKeyChange(e.target.value, setRazorpayKeySecret)}
                       placeholder={isEditing ? "Enter Key Secret" : "••••••••••••••••"}
@@ -663,7 +728,15 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                     <input 
                       type={showWebhookSecret ? "text" : "password"} 
                       className="form-input" 
-                      style={{ paddingRight: '40px' }}
+                      style={{ 
+                        paddingRight: '40px',
+                        backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                        color: !isEditing ? '#64748B' : '#0F172A',
+                        border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                        cursor: !isEditing ? 'not-allowed' : 'text',
+                        opacity: !isEditing ? 0.75 : 1,
+                        fontWeight: !isEditing ? 600 : 700
+                      }}
                       value={razorpayWebhookSecret}
                       onChange={e => handleKeyChange(e.target.value, setRazorpayWebhookSecret)}
                       placeholder={isEditing ? "Enter Webhook Secret" : "••••••••••••••••"}
@@ -691,7 +764,13 @@ export default function Settings({ API_BASE, token, role, currentAdminId, handle
                         paddingRight: '40px',
                         lineHeight: 1.5,
                         wordBreak: 'break-all',
-                        WebkitTextSecurity: showWhatsappToken ? 'none' : 'disc'
+                        WebkitTextSecurity: showWhatsappToken ? 'none' : 'disc',
+                        backgroundColor: !isEditing ? '#F1F5F9' : '#FFFFFF',
+                        color: !isEditing ? '#64748B' : '#0F172A',
+                        border: !isEditing ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                        cursor: !isEditing ? 'not-allowed' : 'text',
+                        opacity: !isEditing ? 0.75 : 1,
+                        fontWeight: !isEditing ? 600 : 700
                       }}
                       value={whatsappToken}
                       onChange={e => handleTokenChange(e.target.value, setWhatsappToken)}

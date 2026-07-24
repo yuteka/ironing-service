@@ -155,17 +155,17 @@ export default function App() {
     'Authorization': `Bearer ${token}`
   });
 
-  // Handle automatic real-time background sync (polls every 5s)
+  // Handle automatic real-time background sync (rapid 2s live polling)
   useEffect(() => {
     if (!token) return;
 
     // Initial full load
     loadAllData(false);
 
-    // Live real-time background polling every 5 seconds
+    // Live real-time background polling every 2 seconds
     const interval = setInterval(() => {
       loadAllData(true);
-    }, 5000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [token]);

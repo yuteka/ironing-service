@@ -163,6 +163,13 @@ export default function OrderDrawer({
                       value={selectedOrder.partner?.id || selectedOrder.partnerId || ''}
                       onChange={e => assignPartner(selectedOrder.id, e.target.value)}
                       disabled={['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status)}
+                      style={{
+                        backgroundColor: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '#F1F5F9' : '#FFFFFF',
+                        color: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '#64748B' : '#0F172A',
+                        fontWeight: 700,
+                        border: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? '1px solid #CBD5E1' : '2px solid #0284c7',
+                        cursor: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].includes(selectedOrder.status) ? 'not-allowed' : 'pointer'
+                      }}
                     >
                       <option value="">-- Choose Partner --</option>
                       {partners.filter(p => p.active && !(selectedOrder.status === 'REASSIGNMENT_NEEDED' && selectedOrder.clothCheckNote && selectedOrder.clothCheckNote.includes(p.name))).map(p => (
@@ -181,17 +188,17 @@ export default function OrderDrawer({
               </div>
 
               <div className="form-group">
-                <label className="form-label" style={{ fontSize: '0.8rem' }}>Set Progress Status</label>
+                <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0F172A' }}>Set Progress Status</label>
                 {['DELIVERED', 'CANCELLED'].includes(selectedOrder.status?.toUpperCase()) ? (
                   <div style={{
-                    padding: '10px 14px', borderRadius: 8, fontWeight: 700, fontSize: '0.88rem',
+                    padding: '12px 16px', borderRadius: 10, fontWeight: 800, fontSize: '0.9rem',
                     backgroundColor: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#ECFDF5' : '#FEF2F2',
-                    color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#059669' : '#DC2626',
-                    border: `1px solid ${selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#A7F3D0' : '#FECACA'}`,
+                    color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#047857' : '#B91C1C',
+                    border: `2px solid ${selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#34D399' : '#F87171'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                   }}>
                     <span>{statusLabels[selectedOrder.status?.toUpperCase()] || selectedOrder.status}</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#047857' : '#B91C1C' }}>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '#065F46' : '#991B1B' }}>
                       {selectedOrder.status?.toUpperCase() === 'DELIVERED' ? '✓ Order Delivered (Locked)' : '✕ Order Cancelled (Locked)'}
                     </span>
                   </div>
@@ -200,18 +207,36 @@ export default function OrderDrawer({
                     className="form-input"
                     value={selectedOrder.status?.toUpperCase()}
                     onChange={e => updateOrderStatus(selectedOrder.id, e.target.value)}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      color: '#0F172A',
+                      fontWeight: 800,
+                      fontSize: '0.92rem',
+                      border: '2px solid #0284c7',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      cursor: 'pointer'
+                    }}
                   >
                     {Object.keys(statusLabels)
                       .filter(st => st !== 'CANCELLED' || selectedOrder.status?.toUpperCase() === 'CANCELLED')
-                      .map(st => (
-                      <option 
-                        key={st} 
-                        value={st} 
-                        disabled={st !== selectedOrder.status?.toUpperCase()}
-                      >
-                        {statusLabels[st]}
-                      </option>
-                    ))}
+                      .map(st => {
+                        const isCurrent = st === selectedOrder.status?.toUpperCase();
+                        return (
+                          <option 
+                            key={st} 
+                            value={st} 
+                            disabled={!isCurrent}
+                            style={{
+                              color: isCurrent ? '#0F172A' : '#94A3B8',
+                              backgroundColor: isCurrent ? '#E0F2FE' : '#F8FAFC',
+                              fontWeight: isCurrent ? 800 : 500
+                            }}
+                          >
+                            {statusLabels[st]} {isCurrent ? ' (Active)' : ' (Locked)'}
+                          </option>
+                        );
+                      })}
                   </select>
                 )}
               </div>

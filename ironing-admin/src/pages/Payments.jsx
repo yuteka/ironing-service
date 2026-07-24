@@ -382,14 +382,13 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                                 <span 
                                   className="notranslate" 
                                   translate="no" 
-                                  onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
+                                  onClick={() => setSelectedPaymentOrder(o)}
                                   style={{ 
                                     fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
                                     color: '#7c3aed', 
                                     fontWeight: 800,
                                     fontSize: '0.72rem',
-                                    cursor: 'pointer',
-                                    textDecoration: 'underline'
+                                    cursor: 'pointer'
                                   }}
                                 >
                                   {fmtInvId(o.id)}
@@ -402,14 +401,13 @@ export default function Payments({ payments, orders = [], loading, loadAllData, 
                               <span 
                                 className="notranslate" 
                                 translate="no" 
-                                onClick={() => { if (setSelectedOrder) setSelectedOrder(o); else setSelectedPaymentOrder(o); }}
+                                onClick={() => setSelectedPaymentOrder(o)}
                                 style={{ 
                                   fontFamily: 'SFMono-Regular, Consolas, Monaco, monospace',
                                   color: '#0284c7', 
                                   fontWeight: 800,
                                   fontSize: '0.72rem',
-                                  cursor: 'pointer',
-                                  textDecoration: 'underline'
+                                  cursor: 'pointer'
                                 }}
                               >
                                 {fmtBookingId(o.id)}
